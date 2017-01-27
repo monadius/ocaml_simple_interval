@@ -109,6 +109,18 @@ type interval = {
     high: float;
   }
 
+let neg_i {low = a; high = b} = {
+    low = -.b;
+    high = -.a;
+  }
+
+let abs_i ({low = a; high = b} as v) =
+  if 0.0 <= a then
+    v
+  else if b <= 0.0 then
+    {low = -.b; high = -.a}
+  else
+    {low = 0.0; high = max (-.a) b}
                  
 let add_ii {low = a; high = b} {low = c; high = d} = {
     low = fadd_low a c;
@@ -196,6 +208,63 @@ let div_ii {low = a; high = b} {low = c; high = d} =
       high = nan;
     }
 
+let div_id {low = a; high = b} c =
+  if c > 0.0 then {
+      low = fdiv_low a c;
+      high = fdiv_high b c;
+    }
+  else if c < 0.0 then {
+      low = fdiv_low b c;
+      high = fdiv_high a c;
+    }
+  else {
+      low = nan;
+      high = nan;
+    }
+
+let div_di a {low = c; high = d} =
+  if c > 0.0 then
+    begin
+      if a >= 0.0 then {
+          low = fdiv_low a d;
+          high = fdiv_high a c;
+        }
+      else {
+          low = fdiv_low a c;
+          high = fdiv_high a d;
+        }
+    end
+  else if d < 0.0 then
+    begin
+      if a >= 0.0 then {
+          low = fdiv_low a d;
+          high = fdiv_high a c;
+        }
+      else {
+          low = fdiv_low a c;
+          high = fdiv_high a d;
+        }
+    end
+  else {
+      low = nan;
+      high = nan;
+    }
+
+let inv_i {low = a; high = b} =
+  if a > 0.0 || b < 0.0 then {
+      low = fdiv_low 1.0 b;
+      high = fdiv_high 1.0 a;
+    }
+  else {
+      low = nan;
+      high = nan;
+    }
+         
+let sqrt_i {low = a; high = b} = {
+    low = fsqrt_low a;
+    high = fsqrt_high b;
+  }
+         
 let exp_i {low = a; high = b} = {
     low = fexp_low a;
     high = fexp_high b;

@@ -247,6 +247,10 @@ let fsqrt_hi x =
 let fpow_n_lo x n =
   match classify_float x with
   | FP_nan -> nan
+  | FP_zero ->
+     if n = 0 then 1.0
+     else if n < 0 then nan
+     else 0.0
   | FP_infinite ->
      if n = 0 then 1.0
      else
@@ -263,6 +267,10 @@ let fpow_n_lo x n =
 let fpow_n_hi x n =
   match classify_float x with
   | FP_nan -> nan
+  | FP_zero ->
+     if n = 0 then 1.0
+     else if n < 0 then nan
+     else 0.0
   | FP_infinite ->
      if n = 0 then 1.0
      else

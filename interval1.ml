@@ -34,9 +34,19 @@ let _ = assert (fpred (-.max_float) = neg_infinity)
 let _ = assert (fpred 0.0 = -.eta_float)
 
 
-let fadd_low x y = fpred (x +. y)
+let fadd_low x y =
+  let r = x +. y in
+  if r = infinity && x < infinity && y < infinity then
+    max_float
+  else
+    fpred r
 
-let fadd_high x y = fsucc (x +. y)
+let fadd_high x y =
+  let r = x +. y in
+  if r = neg_infinity && x > neg_infinity && y > neg_infinity then
+    -.max_float
+  else
+    fsucc r
 
 let fsub_low x y = fpred (x -. y)
 

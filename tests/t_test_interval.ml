@@ -13,18 +13,18 @@ let test_next_float x =
   ignore begin
       match classify_float x with
       | FP_nan ->
-         assert (is_nan y)
+         fact ("nan", is_nan y)
       | FP_infinite ->
          if x = neg_infinity then
-           assert (is_nan y)
+           fact ("neg_infinity", is_nan y)
          else
-           assert (y = infinity)
+           fact ("infinity", y = infinity)
       | FP_zero | FP_normal | FP_subnormal ->
          let d = y -. x in
-         assert (y > x);
-         assert (d > 0.0);
-         assert (x +. d = y);
-         if x < max_float then assert (x +. d *. 0.25 = x);
+         fact ("mono", y > x);
+         fact ("pos", d > 0.0);
+         fact ("eq", x +. d = y);
+         if x < max_float then fact ("small", x +. d *. 0.25 = x);
     end;
   true
                     
@@ -63,18 +63,18 @@ let test_prev_float x =
   ignore begin
       match classify_float x with
       | FP_nan ->
-         assert (is_nan y)
+         fact ("nan", is_nan y)
       | FP_infinite ->
          if x = neg_infinity then
-           assert (y = neg_infinity)
+           fact ("neg_infinity", y = neg_infinity)
          else
-           assert (is_nan y)
+           fact ("infinity", is_nan y)
       | FP_zero | FP_normal | FP_subnormal ->
          let d = x -. y in
-         assert (y < x);
-         assert (d > 0.0);
-         assert (x -. d = y);
-         if x > -.max_float then assert (x -. d *. 0.25 = x);
+         fact ("mono", y < x);
+         fact ("positive", d > 0.0);
+         fact ("eq", x -. d = y);
+         if x > -.max_float then fact ("small", x -. d *. 0.25 = x);
     end;
   true
 
@@ -119,11 +119,11 @@ let test_num_float x =
       a2 = float_of_num_lo r2 and
       b2 = float_of_num_hi r2 in
   ignore begin
-      assert (a = x && b = x);
-      assert (a1 < x && b1 <= x);
-      assert (a2 >= x && b2 > x);
-      if b1 = x then assert (a1 = prev_float x);
-      if a2 = x then assert (b2 = next_float x);
+      fact ("eq", a = x && b = x);
+      fact ("le", a1 < x && b1 <= x);
+      fact ("ge", a2 >= x && b2 > x);
+      if b1 = x then fact ("eq_prev", a1 = prev_float x);
+      if a2 = x then fact ("eq_next", b2 = next_float x);
     end;
   true
 

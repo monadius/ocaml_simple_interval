@@ -1,3 +1,7 @@
+exception Bad_fact of string
+
+let fact (str, b) = if not b then raise (Bad_fact str)
+
 let is_nan x = (compare x nan = 0)
                  
 (* Returns a random floating-point number.
@@ -146,11 +150,18 @@ let run_test (test: 'a test) (data: 'a Stream.t) =
     try
       let result = test.test_func x in
       assert result
-    with _ ->
-      let msg = test.test_arg_name x in
-      let fmt = Format.err_formatter in
-      Format.pp_print_string fmt ("\rFAIL: " ^ msg);
-      Format.pp_print_newline fmt () in
+    with
+    | Bad_fact str ->
+       let msg = Printf.sprintf "\rFAIL (%s): %s"
+                                str (test.test_arg_name x) in
+       let fmt = Format.err_formatter in
+       Format.pp_print_string fmt msg;
+       Format.pp_print_newline fmt ()
+    | _ ->
+       let msg = Printf.sprintf "\rFAIL: %s" (test.test_arg_name x) in
+       let fmt = Format.err_formatter in
+       Format.pp_print_string fmt msg;
+       Format.pp_print_newline fmt () in
   begin
     let fmt = Format.std_formatter in
     Format.pp_print_string fmt ("Running: " ^ test.test_name ^ " ...");

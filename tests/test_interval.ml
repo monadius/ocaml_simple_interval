@@ -243,8 +243,8 @@ let fsqrt_hi x =
        if compare_num (rz */ rz) rx < 0 then next_float z
        else z
 
-(* We assume that 0^0 = 1 *)
-let fpow_n_lo x n =
+(* We assume that x^0 = 1 for any x (nan excluded) *)
+let fpown_lo x n =
   match classify_float x with
   | FP_nan -> nan
   | FP_zero ->
@@ -264,7 +264,7 @@ let fpow_n_lo x n =
      let r = num_of_float x **/ Int n in
      float_of_num_lo r
 
-let fpow_n_hi x n =
+let fpown_hi x n =
   match classify_float x with
   | FP_nan -> nan
   | FP_zero ->
@@ -348,15 +348,15 @@ let div_id v y = div_ii v (mk_const_i y)
 let sqrt_i {lo = a; hi = b} =
   {lo = fsqrt_lo a; hi = fsqrt_hi b}
 
-let pow_in {lo = a; hi = b} n =
+let pown_i {lo = a; hi = b} n =
   if n land 1 = 1 then
-    {lo = fpow_n_lo a n; hi = fpow_n_hi b n}
+    {lo = fpown_lo a n; hi = fpown_hi b n}
   else if 0.0 <= a then
-    {lo = fpow_n_lo a n; hi = fpow_n_hi b n}
+    {lo = fpown_lo a n; hi = fpown_hi b n}
   else if b <= 0.0 then
-    {lo = fpow_n_lo b n; hi = fpow_n_hi a n}
+    {lo = fpown_lo b n; hi = fpown_hi a n}
   else {
       lo = 0.0;
-      hi = fpow_n_hi (float_max [abs_float a; abs_float b]) n
+      hi = fpown_hi (float_max [abs_float a; abs_float b]) n
     }
       

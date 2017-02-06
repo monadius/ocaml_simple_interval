@@ -259,13 +259,10 @@ let fpown_lo x n =
      else 0.0
   | FP_infinite ->
      if n = 0 then 1.0
-     else
-       if x > 0.0 then
-         if n < 0 then 0.0 else infinity
-       else
-         (* We cannot return finite numbers when n < 0 because
-            we assume that infinity represents an arbitrary positive number *)
-         if n land 1 = 0 then 0.0 else neg_infinity
+     else if x = infinity then
+       if n < 0 then 0.0 else infinity
+     else if n land 1 = 0 then 0.0
+     else neg_infinity
   | _ ->
      let r = num_of_float x **/ Int n in
      float_of_num_lo r
@@ -279,10 +276,9 @@ let fpown_hi x n =
      else 0.0
   | FP_infinite ->
      if n = 0 then 1.0
-     else
-       if x > 0.0 then infinity
-       else
-         if n land 1 = 1 then 0.0 else infinity
+     else if x = infinity then infinity
+     else if n land 1 = 1 then 0.0
+     else infinity
   | _ ->
      let r = num_of_float x **/ Int n in
      float_of_num_hi r
@@ -290,48 +286,82 @@ let fpown_hi x n =
 (* Interval type and functions *)
 
 (* [0, +infinity] contains all finite positive numbers, etc. *)
+(* [+infinity, -infinity] represents the only valid empty interval *)
 
 type ti = {
     lo: float;
     hi: float
   }
 
-let is_valid_i {lo; hi} = lo <= hi && lo < infinity && neg_infinity < hi
+let empty_interval = {lo = infinity; hi = neg_infinity}
+
+let entire_interval = {lo = neg_infinity; hi = infinity}
+                       
+let zero_interval = {lo = 0.0; hi = 0.0}
+
+let one_interval = {lo = 1.0; hi = 1.0}
+
+let is_empty {lo; hi} = (lo = infinity && hi = neg_infinity)
+
+let is_entire {lo; hi} = (lo = neg_infinity && hi = infinity)
+                          
+let is_valid ({lo; hi} as v) =
+  (lo <= hi && lo < infinity && neg_infinity < hi) || is_empty v
 
 let is_nan_i {lo; hi} = lo <> lo || hi <> hi
 
-let is_point_i {lo; hi} = (lo = hi)
+let is_point {lo; hi} = (lo = hi && lo < infinity && neg_infinity < hi)
                                                                         
-let contains_i {lo; hi} x = lo <= x && x <= hi
+let contains {lo; hi} x = lo <= x && x <= hi
                                   
 let mk_i a b = {lo = a; hi = b}
       
 let mk_const_i x = {lo = x; hi = x}
 
-let abs_i {lo; hi} =
-  let a = abs_float lo and
-      b = abs_float hi in
-  if 0.0 <= lo || hi <= 0.0 then
-    {lo = float_min [a; b]; hi = float_max [a; b]}
+let abs_i ({lo; hi} as v) =
+  if is_empty v then empty_interval
   else
-    {lo = 0.0; hi = float_max [a; b]}
+    let a = abs_float lo and
+        b = abs_float hi in
+    if 0.0 <= lo || hi <= 0.0 then
+      {lo = float_min [a; b]; hi = float_max [a; b]}
+    else
+      {lo = 0.0; hi = float_max [a; b]}
 
-let neg_i {lo; hi} = {lo = -.hi; hi = -.lo}
+let neg_i ({lo; hi} as v) =
+  if is_empty v then empty_interval else {lo = -.hi; hi = -.lo}
   
-let add_ii {lo = a; hi = b} {lo = c; hi = d} =
-  {lo = fadd_lo a c; hi = fadd_hi b d}
+let add_ii ({lo = a; hi = b} as v) ({lo = c; hi = d} as w) =
+  if is_empty v || is_empty w then empty_interval
+  else
+    {lo = fadd_lo a c; hi = fadd_hi b d}
 
-let sub_ii {lo = a; hi = b} {lo = c; hi = d} =
-  {lo = fsub_lo a d; hi = fsub_hi b c}
+let sub_ii ({lo = a; hi = b} as v) ({lo = c; hi = d} as w) =
+  if is_empty v || is_empty w then empty_interval
+  else
+    {lo = fsub_lo a d; hi = fsub_hi b c}
 
-let mul_ii {lo = a; hi = b} {lo = c; hi = d} = {
-    lo = float_min [fmul_lo a c; fmul_lo a d; fmul_lo b c; fmul_lo b d];
-    hi = float_max [fmul_hi a c; fmul_hi a d; fmul_hi b c; fmul_hi b d]
-  }
+let mul_ii ({lo = a; hi = b} as v) ({lo = c; hi = d} as w) =
+  if is_empty v || is_empty w then empty_interval
+  else {
+      lo = float_min [fmul_lo a c; fmul_lo a d; fmul_lo b c; fmul_lo b d];
+      hi = float_max [fmul_hi a c; fmul_hi a d; fmul_hi b c; fmul_hi b d]
+    }
 
-let div_ii {lo = a; hi = b} ({lo = c; hi = d} as w) =
-  if contains_i w 0.0 then
-    {lo = nan; hi = nan}
+let div_ii ({lo = a; hi = b} as v) ({lo = c; hi = d} as w) =
+  if is_empty v || is_empty w || (c = 0.0 && d = 0.0) then empty_interval
+  else if contains w 0.0 then begin
+      if a = 0.0 && b = 0.0 then zero_interval
+      else if c = 0.0 then {
+          lo = if a >= 0.0 then fdiv_lo a d else neg_infinity;
+          hi = if b <= 0.0 then fdiv_hi b d else infinity
+        }
+      else if d = 0.0 then {
+          lo = if b <= 0.0 then fdiv_lo b c else neg_infinity;
+          hi = if a >= 0.0 then fdiv_hi a c else infinity
+        }
+      else entire_interval
+    end
   else {
       lo = float_min [fdiv_lo a c; fdiv_lo a d; fdiv_lo b c; fdiv_lo b d];
       hi = float_max [fdiv_hi a c; fdiv_hi a d; fdiv_hi b c; fdiv_hi b d]
@@ -353,18 +383,51 @@ let div_di x w = div_ii (mk_const_i x) w
 
 let div_id v y = div_ii v (mk_const_i y)
 
-let sqrt_i {lo = a; hi = b} =
-  {lo = fsqrt_lo a; hi = fsqrt_hi b}
+let inv_i v = div_ii one_interval v
 
-let pown_i {lo = a; hi = b} n =
-  if n land 1 = 1 then
-    {lo = fpown_lo a n; hi = fpown_hi b n}
-  else if 0.0 <= a then
-    {lo = fpown_lo a n; hi = fpown_hi b n}
-  else if b <= 0.0 then
-    {lo = fpown_lo b n; hi = fpown_hi a n}
+let sqrt_i ({lo = a; hi = b} as v) =
+  if is_empty v || b < 0.0 then empty_interval
   else {
-      lo = 0.0;
-      hi = fpown_hi (float_max [abs_float a; abs_float b]) n
+      lo = if a < 0.0 then 0.0 else fsqrt_lo a;
+      hi = fsqrt_hi b
     }
-      
+
+let pown_i ({lo = a; hi = b} as v) n =
+  if is_empty v || (n < 0 && a = 0.0 && b = 0.0) then empty_interval
+  else
+    match n with
+    | 0 -> one_interval
+    | 1 -> v
+    | n when n land 1 = 1 -> begin
+        (* odd n *)
+        if n > 0 then {lo = fpown_lo a n; hi = fpown_hi b n}
+        else if a >= 0.0 then {
+            lo = fpown_lo b n;
+            hi = if a = 0.0 then infinity else fpown_hi a n
+          }
+        else if b <= 0.0 then {
+            lo = if b = 0.0 then neg_infinity else fpown_lo b n;
+            hi = fpown_hi a n
+          }
+        else entire_interval
+      end
+    | _ -> begin
+        (* even n *)
+        if n > 0 then begin
+            if a >= 0.0 then {lo = fpown_lo a n; hi = fpown_hi b n}
+            else if b <= 0.0 then {lo = fpown_lo b n; hi = fpown_hi a n}
+            else {lo = 0.0; hi = fpown_hi (float_max [abs_float a; abs_float b]) n}
+          end
+        else if a >= 0.0 then {
+            lo = fpown_lo b n;
+            hi = if a = 0.0 then infinity else fpown_hi a n
+          }
+        else if b <= 0.0 then {
+            lo = fpown_lo a n;
+            hi = if b = 0.0 then infinity else fpown_hi b n
+          }
+        else {
+            lo = fpown_lo (float_max [abs_float a; abs_float b]) n;
+            hi = infinity
+          }
+      end

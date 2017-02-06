@@ -139,7 +139,10 @@ let rec float_max = function
 
 let round_hi z r =
   match classify_float z with
-  | FP_nan | FP_infinite -> z
+  | FP_nan -> z
+  | FP_infinite ->
+     if z = infinity then z
+     else -.max_float
   | _ ->
      let rz = num_of_float z in
      if compare_num rz r >= 0 then z
@@ -147,7 +150,10 @@ let round_hi z r =
 
 let round_lo z r =
   match classify_float z with
-  | FP_nan | FP_infinite -> z
+  | FP_nan -> z
+  | FP_infinite ->
+     if z = neg_infinity then z
+     else max_float
   | _ ->
      let rz = num_of_float z in
      if compare_num rz r <= 0 then z
@@ -292,6 +298,8 @@ type ti = {
 
 let is_valid_i {lo; hi} = lo <= hi && lo < infinity && neg_infinity < hi
 
+let is_nan_i {lo; hi} = lo <> lo || hi <> hi
+
 let is_point_i {lo; hi} = (lo = hi)
                                                                         
 let contains_i {lo; hi} x = lo <= x && x <= hi
@@ -304,9 +312,9 @@ let abs_i {lo; hi} =
   let a = abs_float lo and
       b = abs_float hi in
   if 0.0 <= lo || hi <= 0.0 then
-    {lo = min a b; hi = max a b}
+    {lo = float_min [a; b]; hi = float_max [a; b]}
   else
-    {lo = 0.0; hi = max a b}
+    {lo = 0.0; hi = float_max [a; b]}
 
 let neg_i {lo; hi} = {lo = -.hi; hi = -.lo}
   

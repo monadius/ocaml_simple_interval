@@ -4,8 +4,11 @@ let eta_float = ldexp 1.0 (-1074)
 
 let phi_float = u_float *. (1.0 +. 2.0 *. u_float)
 
+let min_float2 = 2.0 *. min_float
+               
 let _ = assert (min_float = 0.5 *. (1.0 /. u_float) *. eta_float)
-                      
+let _ = assert (min_float2 = ldexp 1.0 (-1021))
+               
 (* succ and pred from the RZBM09 paper *)
 (* Algorithm 1 *)
                
@@ -33,24 +36,31 @@ let _ = assert (fpred nan <> nan)
 let _ = assert (fpred (-.max_float) = neg_infinity)
 let _ = assert (fpred 0.0 = -.eta_float)
 
-
 let fadd_low x y =
   let r = x +. y in
-  if r = infinity && x < infinity && y < infinity then
-    max_float
-  else
-    fpred r
+  if r = infinity then max_float
+  (* TODO: replace with r = 0.0; 
+     should be faster and the accuracy is not important for subnormal results *)
+  else if -.min_float2 < r && r < min_float2 then r
+  else fpred r
 
 let fadd_high x y =
   let r = x +. y in
-  if r = neg_infinity && x > neg_infinity && y > neg_infinity then
-    -.max_float
-  else
-    fsucc r
+  if r = neg_infinity then -.max_float
+  else if -.min_float2 < r && r < min_float2 then r
+  else fsucc r
 
-let fsub_low x y = fpred (x -. y)
+let fsub_low x y =
+  let r = x -. y in
+  if r = infinity then max_float
+  else if -.min_float2 < r && r < min_float2 then r
+  else fpred r
 
-let fsub_high x y = fsucc (x -. y)
+let fsub_high x y =
+  let r = x -. y in
+  if r = neg_infinity then -.max_float
+  else if -.min_float2 < r && r < min_float2 then r
+  else fsucc r
 
 let fmul_low x y = fpred (x *. y)
 
@@ -119,6 +129,8 @@ type interval = {
     high: float;
   }
 
+let make_interval a b = {low = a; high = b}
+                  
 let neg_i {low = a; high = b} = {
     low = -.b;
     high = -.a;
@@ -129,8 +141,12 @@ let abs_i ({low = a; high = b} as v) =
     v
   else if b <= 0.0 then
     {low = -.b; high = -.a}
-  else
-    {low = 0.0; high = max (-.a) b}
+  else {
+      low = 0.0;
+      high = if -.a > b then -.a
+             else if a <> a then a
+             else b
+    }
                  
 let add_ii {low = a; high = b} {low = c; high = d} = {
     low = fadd_low a c;

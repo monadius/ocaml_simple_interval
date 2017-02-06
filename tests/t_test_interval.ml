@@ -2,7 +2,7 @@ open Num
 open Test
 open Test_interval
 
-let _ = Random.init 0
+(* let () = Random.self_init () *)
 
 let samples = 1000
 

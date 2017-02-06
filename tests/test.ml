@@ -6,7 +6,7 @@ let is_nan x = (compare x nan = 0)
                  
 (* Returns a random floating-point number.
    sign: specifies the sign of the result (0 denotes a random sign)
-   exp: the exponent of the result *)
+   exp: the exponent of the result (does not always hold for very small results) *)
 let rand_float sign exp =
   let neg_flag = if sign = 0 then Random.bool() else (sign < 0) in
   let x = 1.0 +. Random.float (1.0 -. epsilon_float) in
@@ -146,6 +146,7 @@ let mk_test name arg_name f = {
   }
                         
 let run_test (test: 'a test) (data: 'a Stream.t) =
+  let new_line_flag = ref true in
   let run x =
     try
       let result = test.test_func x in
@@ -155,11 +156,13 @@ let run_test (test: 'a test) (data: 'a Stream.t) =
        let msg = Printf.sprintf "\rFAIL (%s): %s"
                                 str (test.test_arg_name x) in
        let fmt = Format.err_formatter in
+       if !new_line_flag then (Format.pp_print_newline fmt (); new_line_flag := false);
        Format.pp_print_string fmt msg;
        Format.pp_print_newline fmt ()
     | _ ->
        let msg = Printf.sprintf "\rFAIL: %s" (test.test_arg_name x) in
        let fmt = Format.err_formatter in
+       if !new_line_flag then (Format.pp_print_newline fmt (); new_line_flag := false);
        Format.pp_print_string fmt msg;
        Format.pp_print_newline fmt () in
   begin
@@ -215,22 +218,22 @@ let run_eq_f ?cmp name f data =
 let run_eq_f2 ?cmp name f data =
   let test = mk_eq_test ?cmp name (name_f2 name) f in
   let sd = Stream.of_list data in
-  run_test test (stream_map (fun (a, b, r) -> (a, b), r) sd)
+  run_test test sd
 
 let run_eq_f2f2 ?cmp name f data =
   let test = mk_eq_test ?cmp name (name_f2f2 name) (fun (p1, p2) -> f p1 p2) in
   let sd = Stream.of_list data in
-  run_test test (stream_map (fun (a, b, c, d, r) -> ((a, b), (c, d)), r) sd)
+  run_test test (stream_map (fun ((a, b), (c, d), r) -> ((a, b), (c, d)), r) sd)
 
 let run_eq_f2f ?cmp name f data =
   let test = mk_eq_test ?cmp name (name_f2f name) (fun (p, x) -> f p x) in
   let sd = Stream.of_list data in
-  run_test test (stream_map (fun (a, b, c, r) -> ((a, b), c), r) sd)
+  run_test test (stream_map (fun ((a, b), c, r) -> ((a, b), c), r) sd)
 
 let run_eq_ff2 ?cmp name f data =
   let test = mk_eq_test ?cmp name (name_ff2 name) (fun (x, p) -> f x p) in
   let sd = Stream.of_list data in
-  run_test test (stream_map (fun (a, b, c, r) -> (a, (b, c)), r) sd)
+  run_test test (stream_map (fun (a, (b, c), r) -> (a, (b, c)), r) sd)
 
 (* Predefined test data *)
            

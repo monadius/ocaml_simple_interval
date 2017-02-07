@@ -20,22 +20,6 @@ let fpred x =
   let e = phi_float *. abs_float x +. eta_float in
   x -. e
 
-let _ = assert (fsucc u_float = phi_float)
-let _ = assert (fsucc 0.0 = eta_float)
-let _ = assert (fsucc infinity = infinity)
-let _ = assert (fsucc nan <> nan)
-let _ = assert (fsucc neg_infinity <> nan)
-let _ = assert (fsucc 1.0 = 1.0 +. epsilon_float)
-
-let _ = assert (fpred eta_float = 0.0)
-let _ = assert (fpred (-1.0) = -1.0 -. epsilon_float)
-let _ = assert (fpred 1.0 = 1.0 -. u_float)
-let _ = assert (fpred infinity <> nan)
-let _ = assert (fpred neg_infinity = neg_infinity)
-let _ = assert (fpred nan <> nan)
-let _ = assert (fpred (-.max_float) = neg_infinity)
-let _ = assert (fpred 0.0 = -.eta_float)
-
 let fadd_low x y =
   let r = x +. y in
   if r = infinity then max_float
@@ -53,7 +37,7 @@ let fadd_high x y =
 let fsub_low x y =
   let r = x -. y in
   if r = infinity then max_float
-  else if -.min_float2 < r && r < min_float2 then r
+  else if -.min_float2 < r && r <  min_float2 then r
   else fpred r
 
 let fsub_high x y =
@@ -62,9 +46,27 @@ let fsub_high x y =
   else if -.min_float2 < r && r < min_float2 then r
   else fsucc r
 
-let fmul_low x y = fpred (x *. y)
+let fmul_low x y =
+  if x = 0. || y = 0. then 0.
+  else
+    let r = x *. y in
+    if r = infinity then max_float
+    else if r = 0. then
+      if (x >= 0. && y >= 0.) || (x <= 0. && y <= 0.) then 0.
+      else -.eta_float
+    else
+      fpred r
 
-let fmul_high x y = fsucc (x *. y)
+let fmul_high x y =
+  if x = 0. || y = 0. then 0.
+  else
+    let r = x *. y in
+    if r = neg_infinity then -.max_float
+    else if r = 0. then
+      if (x >= 0. && y <= 0.) || (x <= 0. && y >= 0.) then 0.
+      else eta_float
+    else
+      fsucc r
 
 let fdiv_low x y = fpred (x /. y)
 
@@ -129,6 +131,19 @@ type interval = {
     high: float;
   }
 
+let is_empty {low = a; high = b} = (a = infinity && b = neg_infinity)
+
+let is_valid ({low = a; high = b} as v) =
+  (a <= b && a < infinity && neg_infinity < b) || is_empty v
+                  
+let empty_interval = {low = infinity; high = neg_infinity}
+
+let entire_interval = {low = neg_infinity; high = infinity}
+                       
+let zero_interval = {low = 0.0; high = 0.0}
+
+let one_interval = {low = 1.0; high = 1.0}
+                  
 let make_interval a b = {low = a; high = b}
                   
 let neg_i {low = a; high = b} = {
@@ -137,49 +152,58 @@ let neg_i {low = a; high = b} = {
   }
 
 let abs_i ({low = a; high = b} as v) =
-  if 0.0 <= a then
-    v
+  (* The first condition handles positive and empty intervals *)
+  if 0.0 <= a then v
   else if b <= 0.0 then
     {low = -.b; high = -.a}
-  else {
-      low = 0.0;
-      high = if -.a > b then -.a
-             else if a <> a then a
-             else b
-    }
+  else
+    {low = 0.0; high = max (-.a) b}
                  
-let add_ii {low = a; high = b} {low = c; high = d} = {
+let add_ii {low = a; high = b} {low = c; high = d} =
+  if a = infinity || c = infinity then empty_interval
+  else {
     low = fadd_low a c;
     high = fadd_high b d;
   }
 
-let add_id {low = a; high = b} c = {
+let add_id {low = a; high = b} c =
+  if a = infinity then empty_interval
+  else {
     low = fadd_low a c;
     high = fadd_high b c;
   }
 
-let add_di c {low = a; high = b} = {
+let add_di c {low = a; high = b} =
+  if a = infinity then empty_interval
+  else {
     low = fadd_low c a;
     high = fadd_high c b;
   }
 
-let sub_ii {low = a; high = b} {low = c; high = d} = {
+let sub_ii {low = a; high = b} {low = c; high = d} =
+  if a = infinity || c = infinity then empty_interval
+  else {
     low = fsub_low a d;
     high = fsub_high b c;
   }
 
-let sub_id {low = a; high = b} c = {
+let sub_id {low = a; high = b} c =
+  if a = infinity then empty_interval
+  else {
     low = fsub_low a c;
     high = fsub_high b c;
   }
 
-let sub_di c {low = a; high = b} = {
+let sub_di c {low = a; high = b} =
+  if a = infinity then empty_interval
+  else {
     low = fsub_low c b;
     high = fsub_high c a;
   }
 
 let mul_ii {low = a; high = b} {low = c; high = d} =
-  if a >= 0.0 then {
+  if a = infinity || c = infinity then empty_interval
+  else if a >= 0.0 then {
       low = (if c >= 0.0 then fmul_low a c else fmul_low b c);
       high = (if d >= 0.0 then fmul_high b d else fmul_high a d);
     }
@@ -201,7 +225,8 @@ let mul_ii {low = a; high = b} {low = c; high = d} =
     }
       
 let mul_id {low = a; high = b} c =
-  if c > 0.0 then {
+  if a = infinity then empty_interval
+  else if c > 0.0 then {
       low = fmul_low a c;
       high = fmul_high b c;
     }

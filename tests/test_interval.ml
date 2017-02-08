@@ -113,20 +113,31 @@ let float_of_num_hi r =
   else
     float_of_pos_num_hi r
 
-let rec float_min = function
-  | [] -> failwith "float_min: empty list"
+let rec float_min_nan = function
+  | [] -> failwith "float_min_nan: empty list"
   | [x] -> x
   | x :: xs -> if x <> x then nan
-               else let t = float_min xs in
+               else let t = float_min_nan xs in
                     if t <> t || t < x then t else x
 
-let rec float_max = function
-  | [] -> failwith "float_max: empty list"
+let rec float_max_nan = function
+  | [] -> failwith "float_max_nan: empty list"
   | [x] -> x
   | x :: xs -> if x <> x then nan
-               else let t = float_max xs in
+               else let t = float_max_nan xs in
                     if t <> t || t > x then t else x
-                                 
+
+let rec float_min = function
+  | [] -> infinity
+  | x :: xs -> if x = x then min x (float_min xs)
+               else float_min xs
+
+let rec float_max = function
+  | [] -> neg_infinity
+  | x :: xs -> if x = x then max x (float_max xs)
+               else float_max xs
+
+                                                     
 (* We consider that 0.0 is a real 0 and 0.0 = -0.0.
    We consider that infinity represents a finite positive number and
    neg_infinity represents a finite negative number.
@@ -164,7 +175,10 @@ let fadd_lo x y =
   | FP_zero, _ -> y
   | _, FP_zero -> x
   | FP_nan, _ | _, FP_nan -> nan
-  | FP_infinite, _ | _, FP_infinite -> x +. y
+  | FP_infinite, _ | _, FP_infinite ->
+     let r = x +. y in
+     assert (r = infinity || r = neg_infinity || r <> r);
+     r
   | _ -> 
      let r = num_of_float x +/ num_of_float y in
      round_lo (x +. y) r
@@ -174,7 +188,10 @@ let fadd_hi x y =
   | FP_zero, _ -> y
   | _, FP_zero -> x
   | FP_nan, _ | _, FP_nan -> nan
-  | FP_infinite, _ | _, FP_infinite -> x +. y
+  | FP_infinite, _ | _, FP_infinite ->
+     let r = x +. y in
+     assert (r = infinity || r = neg_infinity || r <> r);
+     r
   | _ ->
      let r = num_of_float x +/ num_of_float y in
      round_hi (x +. y) r
@@ -187,7 +204,11 @@ let fmul_lo x y =
   match classify_float x, classify_float y with
   | FP_nan, _ | _, FP_nan -> nan
   | FP_zero, _ | _, FP_zero -> 0.0
-  | FP_infinite, _ | _, FP_infinite -> x *. y
+  | FP_infinite, _ | _, FP_infinite ->
+     let r = x *. y in
+     assert (r = infinity || r = neg_infinity);
+     if r = infinity then max_float
+     else r
   | _ -> 
      let r = num_of_float x */ num_of_float y in
      round_lo (x *. y) r
@@ -196,7 +217,11 @@ let fmul_hi x y =
   match classify_float x, classify_float y with
   | FP_nan, _ | _, FP_nan -> nan
   | FP_zero, _ | _, FP_zero -> 0.0
-  | FP_infinite, _ | _, FP_infinite -> x *. y
+  | FP_infinite, _ | _, FP_infinite ->
+     let r = x *. y in
+     assert (r = infinity || r = neg_infinity);
+     if r = neg_infinity then -.max_float
+     else r
   | _ -> 
      let r = num_of_float x */ num_of_float y in
      round_hi (x *. y) r
@@ -206,7 +231,15 @@ let fdiv_lo x y =
   | _, FP_zero -> nan
   | FP_nan, _ | _, FP_nan -> nan
   | FP_zero, _ -> 0.0
-  | FP_infinite, _ | _, FP_infinite -> x /. y
+  | FP_infinite, FP_infinite -> nan
+  | FP_infinite, _ | _, FP_infinite ->
+     let r = x /. y in
+     assert (r = infinity || r = neg_infinity || r = 0.);
+     if r = infinity then max_float
+     else if r = 0. then
+       if (x >= 0. && y >= 0.) || (x <= 0. && y <= 0.) then 0.
+       else -.ldexp 1. (-1074)
+     else neg_infinity
   | _ -> 
      let r = num_of_float x // num_of_float y in
      round_lo (x /. y) r
@@ -216,7 +249,15 @@ let fdiv_hi x y =
   | _, FP_zero -> nan
   | FP_nan, _ | _, FP_nan -> nan
   | FP_zero, _ -> 0.0
-  | FP_infinite, _ | _, FP_infinite -> x /. y
+  | FP_infinite, FP_infinite -> nan
+  | FP_infinite, _ | _, FP_infinite ->
+     let r = x /. y in
+     assert (r = infinity || r = neg_infinity || r = 0.);
+     if r = neg_infinity then -.max_float
+     else if r = 0. then
+       if (x >= 0. && y <= 0.) || (x <= 0. && y >= 0.) then 0.
+       else ldexp 1. (-1074)
+     else infinity
   | _ -> 
      let r = num_of_float x // num_of_float y in
      round_hi (x /. y) r
@@ -324,9 +365,9 @@ let abs_i ({lo; hi} as v) =
     let a = abs_float lo and
         b = abs_float hi in
     if 0.0 <= lo || hi <= 0.0 then
-      {lo = float_min [a; b]; hi = float_max [a; b]}
+      {lo = float_min_nan [a; b]; hi = float_max_nan [a; b]}
     else
-      {lo = 0.0; hi = float_max [a; b]}
+      {lo = 0.0; hi = float_max_nan [a; b]}
 
 let neg_i ({lo; hi} as v) =
   if is_empty v then empty_interval else {lo = -.hi; hi = -.lo}
@@ -344,8 +385,8 @@ let sub_ii ({lo = a; hi = b} as v) ({lo = c; hi = d} as w) =
 let mul_ii ({lo = a; hi = b} as v) ({lo = c; hi = d} as w) =
   if is_empty v || is_empty w then empty_interval
   else {
-      lo = float_min [fmul_lo a c; fmul_lo a d; fmul_lo b c; fmul_lo b d];
-      hi = float_max [fmul_hi a c; fmul_hi a d; fmul_hi b c; fmul_hi b d]
+      lo = float_min_nan [fmul_lo a c; fmul_lo a d; fmul_lo b c; fmul_lo b d];
+      hi = float_max_nan [fmul_hi a c; fmul_hi a d; fmul_hi b c; fmul_hi b d]
     }
 
 let div_ii ({lo = a; hi = b} as v) ({lo = c; hi = d} as w) =
@@ -367,6 +408,16 @@ let div_ii ({lo = a; hi = b} as v) ({lo = c; hi = d} as w) =
       hi = float_max [fdiv_hi a c; fdiv_hi a d; fdiv_hi b c; fdiv_hi b d]
     }
 
+let x = mk_i neg_infinity infinity and
+    y = mk_i neg_infinity (-.max_float)
+         
+let a = x.lo and b = x.hi and
+    c = y.lo and d = y.hi
+
+let t1 = [fdiv_lo a c; fdiv_lo a d; fdiv_lo b c; fdiv_lo b d]
+let t2 = [fdiv_hi a c; fdiv_hi a d; fdiv_hi b c; fdiv_hi b d]
+
+                       
 let add_di x w = add_ii (mk_const_i x) w
 
 let add_id v y = add_ii v (mk_const_i y)
@@ -416,7 +467,7 @@ let pown_i ({lo = a; hi = b} as v) n =
         if n > 0 then begin
             if a >= 0.0 then {lo = fpown_lo a n; hi = fpown_hi b n}
             else if b <= 0.0 then {lo = fpown_lo b n; hi = fpown_hi a n}
-            else {lo = 0.0; hi = fpown_hi (float_max [abs_float a; abs_float b]) n}
+            else {lo = 0.0; hi = fpown_hi (float_max_nan [abs_float a; abs_float b]) n}
           end
         else if a >= 0.0 then {
             lo = fpown_lo b n;
@@ -427,7 +478,7 @@ let pown_i ({lo = a; hi = b} as v) n =
             hi = if b = 0.0 then infinity else fpown_hi b n
           }
         else {
-            lo = fpown_lo (float_max [abs_float a; abs_float b]) n;
+            lo = fpown_lo (float_max_nan [abs_float a; abs_float b]) n;
             hi = infinity
           }
       end

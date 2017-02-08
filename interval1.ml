@@ -37,7 +37,7 @@ let fadd_high x y =
 let fsub_low x y =
   let r = x -. y in
   if r = infinity then max_float
-  else if -.min_float2 < r && r <  min_float2 then r
+  else if -.min_float2 < r && r < min_float2 then r
   else fpred r
 
 let fsub_high x y =
@@ -68,26 +68,58 @@ let fmul_high x y =
     else
       fsucc r
 
-let fdiv_low x y = fpred (x /. y)
+let fdiv_low x y =
+  if x = 0. then (if y <> 0. then 0. else nan)
+  else
+    let r = x /. y in
+    if r = infinity then max_float
+    else if r = 0. then
+      if (x >= 0. && y >= 0.) || (x <= 0. && y <= 0.) then 0.
+      else -.eta_float
+    else
+      fpred r
 
-let fdiv_high x y = fsucc (x /. y)
+let fdiv_high x y =
+  if x = 0. then (if y <> 0. then 0. else nan)
+  else
+    let r = x /. y in
+    if r = neg_infinity then -.max_float
+    else if r = 0. then
+      if (x >= 0. && y <= 0.) || (x <= 0. && y >= 0.) then 0.
+      else eta_float
+    else
+      fsucc r
 
-let fsqrt_low x = if x = 0.0 then 0.0 else fpred (sqrt x)
+let fsqrt_low x =
+  if x = 0. then 0.
+  else
+    let r = sqrt x in
+    if r = infinity then max_float
+    else fpred r
 
-let fsqrt_high x = if x = 0.0 then 0.0 else fsucc (sqrt x)
+let fsqrt_high x = if x = 0. then 0. else fsucc (sqrt x)
 
 let fexp_low x =
   let r = exp x in
-  if r > 0.0 then
-    fpred r
-  else
-    0.0
+  if r = infinity then max_float
+  else if r > 0. then fpred r
+  else 0.
 
 let fexp_high x = fsucc (exp x)
 
-let flog_low x = fpred (log x)
+let flog_low x =
+  if x = 1. then 0.
+  else
+    let r = log x in
+    if r = infinity then max_float
+    else fpred r
 
-let flog_high x = fsucc (log x)
+let flog_high x =
+  if x = 1. then 0.
+  else
+    let r = log x in
+    if r = neg_infinity then -.max_float
+    else fsucc r
 
 let fcos_low x =
   let r = cos x in
@@ -125,7 +157,86 @@ let fsin_high x =
   else
     1.0
                           
+let rec fpown_low_pos x n =
+  assert (x >= 0. && n > 0);
+  if n = 1 || x = 0. then x
+  else if n = 2 then fmul_low x x
+  else if n = 3 then fmul_low x (fmul_low x x)
+  else if n land 1 = 0 then
+    let t = fpown_low_pos x (n lsr 1) in
+    fmul_low t t
+  else
+    fmul_low x (fpown_low_pos x (n - 1))
 
+let rec fpown_high_pos x n =
+  assert (x >= 0. && n > 0);
+  if n = 1 || x = 0. then x
+  else if n = 2 then fmul_high x x
+  else if n = 3 then fmul_high x (fmul_high x x)
+  else if n land 1 = 0 then
+    let t = fpown_high_pos x (n lsr 1) in
+    fmul_high t t
+  else
+    fmul_high x (fpown_high_pos x (n - 1))
+
+let fpown_low x n =
+  match n with
+  | 0 -> 1.
+  | 1 -> x
+  | 2 -> fmul_low x x
+  | n when (n land 1 = 0) || x >= 0. -> begin
+      let a = abs_float x in
+      if n > 0 then
+        if a = infinity then max_float
+        else fpown_low_pos a n
+      else
+        if a = infinity then 0.
+        else if a = 0. then nan
+        else fdiv_low 1.0 (fpown_high_pos a (-n))
+    end
+  | _ -> begin
+      let a = -.x in
+      if n > 0 then
+        if a = infinity then neg_infinity
+        else -.fpown_high_pos a n
+      else
+        if a = infinity then -.eta_float
+        else if a = 0. then nan
+        else -.(fdiv_high 1.0 (fpown_low_pos a (-n)))
+    end
+
+let fpown_high x n =
+  match n with
+  | 0 -> 1.
+  | 1 -> x
+  | 2 -> fmul_high x x
+  | n when (n land 1 = 0) || x >= 0. -> begin
+      let a = abs_float x in
+      if n > 0 then
+        if a = infinity then infinity
+        else fpown_high_pos a n
+      else
+        if a = infinity then eta_float
+        else if a = 0. then nan
+        else fdiv_high 1.0 (fpown_low_pos a (-n))
+    end
+  | _ -> begin
+      let a = -.x in
+      if n > 0 then
+        if a = infinity then -.max_float
+        else -.fpown_low_pos a n
+      else
+        if a = infinity then 0.
+        else if a = 0. then nan
+        else -.(fdiv_low 1.0 (fpown_high_pos a (-n)))
+    end
+     
+(* 
+Alternative implementation for n >= 4:
+let fpown_high x n =
+  fexp_high (float_of_int n *. flog_high x)
+*)
+                                                
 type interval = {
     low: float;
     high: float;
@@ -246,7 +357,9 @@ let mul_id {low = a; high = b} c =
 let mul_di c i = mul_id i c
     
 let div_ii {low = a; high = b} {low = c; high = d} =
-  if c > 0.0 then {
+  if a = infinity || c = infinity || (c = 0. && d = 0.) then
+    empty_interval
+  else if c > 0.0 then {
       low = (if a >= 0.0 then fdiv_low a d else fdiv_low a c);
       high = (if b <= 0.0 then fdiv_high b d else fdiv_high b c);
     }
@@ -254,13 +367,20 @@ let div_ii {low = a; high = b} {low = c; high = d} =
       low = (if b <= 0.0 then fdiv_low b c else fdiv_low b d);
       high = (if a >= 0.0 then fdiv_high a c else fdiv_high a d);
     }
-  else {
-      low = nan;
-      high = nan;
+  else if a = 0. && b = 0. then zero_interval
+  else if c = 0. then {
+      low = if a >= 0. then fdiv_low a d else neg_infinity;
+      high = if b <= 0. then fdiv_high b d else infinity;
     }
+  else if d = 0. then {
+      low = if b <= 0. then fdiv_low b c else neg_infinity;
+      high = if a >= 0. then fdiv_high a c else infinity;
+    }
+  else entire_interval
 
 let div_id {low = a; high = b} c =
-  if c > 0.0 then {
+  if a = infinity then empty_interval
+  else if c > 0.0 then {
       low = fdiv_low a c;
       high = fdiv_high b c;
     }
@@ -268,15 +388,12 @@ let div_id {low = a; high = b} c =
       low = fdiv_low b c;
       high = fdiv_high a c;
     }
-  else {
-      low = nan;
-      high = nan;
-    }
+  else empty_interval
 
 let div_di a {low = c; high = d} =
-  if c > 0.0 then
-    begin
-      if a >= 0.0 then {
+  if c = infinity then empty_interval
+  else if c > 0. then begin
+      if a >= 0. then {
           low = fdiv_low a d;
           high = fdiv_high a c;
         }
@@ -285,9 +402,8 @@ let div_di a {low = c; high = d} =
           high = fdiv_high a d;
         }
     end
-  else if d < 0.0 then
-    begin
-      if a >= 0.0 then {
+  else if d < 0. then begin
+      if a >= 0. then {
           low = fdiv_low a d;
           high = fdiv_high a c;
         }
@@ -296,33 +412,67 @@ let div_di a {low = c; high = d} =
           high = fdiv_high a d;
         }
     end
-  else {
-      low = nan;
-      high = nan;
-    }
+  else if c = 0. && d = 0. then empty_interval
+  else if a = 0. then zero_interval
+  else if c = 0. then begin
+      if a >= 0. then {
+          low = fdiv_low a d;
+          high = infinity;
+        }
+      else {
+          low = neg_infinity;
+          high = fdiv_high a d;
+        }
+    end
+  else if d = 0. then begin
+      if a >= 0. then {
+          low = neg_infinity;
+          high = fdiv_high a c;
+        }
+      else {
+          low = fdiv_low a c;
+          high = infinity;
+        }
+    end
+  else entire_interval
 
 let inv_i {low = a; high = b} =
-  if a > 0.0 || b < 0.0 then {
-      low = fdiv_low 1.0 b;
-      high = fdiv_high 1.0 a;
+  if a = infinity then empty_interval
+  else if 0. < a || b < 0. then {
+      low = fdiv_low 1. b;
+      high = fdiv_high 1. a;
     }
-  else {
-      low = nan;
-      high = nan;
+  else if a = 0. then begin
+      if b = 0. then empty_interval
+      else {
+          low = fdiv_low 1. b;
+          high = infinity;
+        }
+    end
+  else if b = 0. then {
+      low = neg_infinity;
+      high = fdiv_high 1. a;
     }
+  else entire_interval
          
-let sqrt_i {low = a; high = b} = {
-    low = fsqrt_low a;
+let sqrt_i {low = a; high = b} =
+  if b < 0. then empty_interval
+  else {
+    low = if a <= 0. then 0. else fsqrt_low a;
     high = fsqrt_high b;
   }
          
-let exp_i {low = a; high = b} = {
+let exp_i {low = a; high = b} =
+  if a = infinity then empty_interval
+  else {
     low = fexp_low a;
     high = fexp_high b;
   }
 
-let log_i {low = a; high = b} = {
-    low = flog_low a;
+let log_i {low = a; high = b} =
+  if b < 0. then empty_interval
+  else {
+    low = if a <= 0. then neg_infinity else flog_low a;
     high = flog_high b;
   }
 

@@ -408,16 +408,6 @@ let div_ii ({lo = a; hi = b} as v) ({lo = c; hi = d} as w) =
       hi = float_max [fdiv_hi a c; fdiv_hi a d; fdiv_hi b c; fdiv_hi b d]
     }
 
-let x = mk_i neg_infinity infinity and
-    y = mk_i neg_infinity (-.max_float)
-         
-let a = x.lo and b = x.hi and
-    c = y.lo and d = y.hi
-
-let t1 = [fdiv_lo a c; fdiv_lo a d; fdiv_lo b c; fdiv_lo b d]
-let t2 = [fdiv_hi a c; fdiv_hi a d; fdiv_hi b c; fdiv_hi b d]
-
-                       
 let add_di x w = add_ii (mk_const_i x) w
 
 let add_id v y = add_ii v (mk_const_i y)
@@ -482,3 +472,5 @@ let pown_i ({lo = a; hi = b} as v) n =
             hi = infinity
           }
       end
+
+let sqr_i v = pown_i v 2

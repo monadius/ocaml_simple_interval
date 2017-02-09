@@ -458,9 +458,69 @@ let inv_i {low = a; high = b} =
 let sqrt_i {low = a; high = b} =
   if b < 0. then empty_interval
   else {
-    low = if a <= 0. then 0. else fsqrt_low a;
-    high = fsqrt_high b;
-  }
+      low = if a <= 0. then 0. else fsqrt_low a;
+      high = fsqrt_high b;
+    }
+
+let sqr_i {low = a; high = b} =
+  if a = infinity then empty_interval
+  else if a >= 0. then
+    {low = fmul_low a a; high = fmul_high b b}
+  else if b <= 0. then
+    {low = fmul_low b b; high = fmul_high a a}
+  else
+    let t = max (-.a) b in
+    {low = 0.; high = fsucc (t *. t)}
+
+let pown_i ({low = a; high = b} as v) n =
+  if a = infinity then empty_interval
+  else
+    match n with
+    | 0 -> one_interval
+    | 1 -> v
+    | 2 -> sqr_i v
+    | n when (n land 1 = 1) -> begin
+        if n > 0 then
+          {low = fpown_low a n; high = fpown_high b n}
+        else begin
+            if a = 0. && b = 0. then empty_interval
+            else if a >= 0. then {
+                low = fpown_low b n;
+                high = if a = 0. then infinity else fpown_high a n;
+              }
+            else if b <= 0. then {
+                low = if b = 0. then neg_infinity else fpown_low b n;
+                high = fpown_high a n;
+              }
+            else entire_interval
+          end
+      end
+    | _ -> begin
+        if n > 0 then begin
+            if a >= 0. then
+              {low = fpown_low a n; high = fpown_high b n}
+            else if b <= 0. then
+              {low = fpown_low b n; high = fpown_high a n}
+            else
+              let t = max (-.a) b in
+              {low = 0.; high = fpown_high t n}
+          end
+        else begin
+            if a = 0. && b = 0. then empty_interval
+            else if a >= 0. then {
+                low = fpown_low b n;
+                high = if a = 0. then infinity else fpown_high a n;
+              }
+            else if b <= 0. then {
+                low = fpown_low a n;
+                high = if b = 0. then infinity else fpown_high b n;
+              }
+            else {
+                low = fpown_low (max (-.a) b) n;
+                high = infinity;
+              }
+          end
+      end
          
 let exp_i {low = a; high = b} =
   if a = infinity then empty_interval

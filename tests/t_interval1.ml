@@ -500,12 +500,12 @@ let test_sqrt_i ((a, b) as p) =
     fact ("valid", is_valid r && T.is_valid tr);
     fact ("subset", test_subset r tr);
     fact ("2ulp", test_subset_2ulp tr r);
-    if is_pos v then fact ("pos", is_pos r);
+    fact ("pos", is_pos r);
     if v.high < 0. then fact ("empty", is_empty r);
   end;
   true
 
-let () =
+let xxx () =
   let f = fun (a, b) -> sqrt_i (make_interval a b) in
   run_eq_f2 "sqrt_i (eq)" ~cmp:cmp_intervals f [
               (-0., 0.),                zero_interval;
@@ -518,9 +518,123 @@ let () =
               (-1., infinity),          make_interval 0. infinity;
             ]
 
-let () =
+let xxx () =
   let f = test_sqrt_i in
   run_test (test_f2 "sqrt_i (special)" f)
            (special_data_f2 ());
   run_test (test_f2 "sqrt_i" f)
+           (standard_data_f2 ~n:samples ~sign:0)
+
+(* sqr tests *)
+
+let test_sqr_i ((a, b) as p) =
+  let v, tv = intervals_of_pair p in
+  let r = sqr_i v and
+      tr = T.sqr_i tv in
+  begin
+    fact ("valid", is_valid r && T.is_valid tr);
+    fact ("subset", test_subset r tr);
+    fact ("2ulp", test_subset_2ulp tr r);
+    fact ("pos", is_pos r);
+  end;
+  true
+
+let xxx () =
+  let f = fun (a, b) -> sqr_i (make_interval a b) in
+  run_eq_f2 "sqr_i (eq)" ~cmp:cmp_intervals f [
+              (-0., 0.),                zero_interval;
+              (infinity, neg_infinity), empty_interval;
+              (neg_infinity, infinity), make_interval 0. infinity;
+              (0., infinity),           make_interval 0. infinity;
+              (neg_infinity, 0.),       make_interval 0. infinity;
+              (-1., infinity),          make_interval 0. infinity;
+              (neg_infinity, 2.),       make_interval 0. infinity;
+            ]
+
+let xxx () =
+  let f = test_sqr_i in
+  run_test (test_f2 "sqr_i (special)" f)
+           (special_data_f2 ());
+  run_test (test_f2 "sqr_i" f)
+           (standard_data_f2 ~n:samples ~sign:0)
+
+
+(* pown tests *)
+
+let test_pown_i ((a, b) as p) =
+  let v, tv = intervals_of_pair p in
+  let r0 = pown_i v 0 and
+      r1 = pown_i v 1 and
+      r3 = pown_i v 3 and
+      r8 = pown_i v 8 and
+      rn1 = pown_i v (-1) and
+      rn2 = pown_i v (-2) and
+      rn3 = pown_i v (-3) and
+      tr3 = T.pown_i tv 3 and
+      tr8 = T.pown_i tv 8 and
+      trn1 = T.pown_i tv (-1) and
+      trn2 = T.pown_i tv (-2) and
+      trn3 = T.pown_i tv (-3) in
+  begin
+    fact ("valid", is_valid r0 && is_valid r1 && is_valid r3 && is_valid r8 &&
+                     is_valid rn1 && is_valid rn2 && is_valid rn3 &&
+                       T.is_valid tr3 && T.is_valid tr8 && T.is_valid trn1 &&
+                         T.is_valid trn2 && T.is_valid trn3);
+    if is_empty v then fact ("empty0", is_empty r0)
+    else fact ("eq0", cmp_intervals r0 one_interval = 0);
+    if T.is_empty tr3 then fact ("empty3", is_empty r3);
+    if T.is_empty tr8 then fact ("empty8", is_empty r8);
+    if T.is_empty trn1 then fact ("empty(-1)", is_empty rn1);
+    if T.is_empty trn2 then fact ("empty(-2)", is_empty rn2);
+    if T.is_empty trn3 then fact ("empty(-3)", is_empty rn3);
+    fact ("eq1", cmp_intervals r1 v = 0);
+    fact ("subset_pos", test_subset r3 tr3 && test_subset r8 tr8);
+    fact ("subset_neg", test_subset rn1 trn1 && test_subset rn2 trn2 && test_subset rn3 trn3);
+    fact ("2ulp(-1)", test_subset_2ulp trn1 rn1);
+    if is_pos v then fact ("pos", is_pos r3 && is_pos r8 &&
+                                    is_pos rn1 && is_pos rn2 && is_pos rn3);
+    if is_neg v then fact ("neg(odd)", is_neg r3 && is_neg rn1 && is_neg rn3);
+    if is_neg v then fact ("pos(even)", is_pos r8 && is_pos rn2);
+  end;
+  true
+
+let xxx () =
+  let f = fun (a, b) e -> pown_i (make_interval a b) (int_of_float e) in
+  run_eq_f2f "pown_i (eq)" ~cmp:cmp_intervals f [
+               (-0., 0.), 3.,                 zero_interval;
+               (0., 0.), 8.,                  zero_interval;
+               (0., 0.), -2.,                 empty_interval;              
+               (0., 0.), -3.,                 empty_interval;
+               (0., 0.), -8.,                 empty_interval;
+               (infinity, neg_infinity), -3., empty_interval;
+               (neg_infinity, infinity), 3.,  entire_interval;
+               (neg_infinity, infinity), 8.,  make_interval 0. infinity;
+               (neg_infinity, infinity), -2., make_interval 0. infinity;
+               (neg_infinity, infinity), -3., entire_interval;
+               (neg_infinity, infinity), -8., make_interval 0. infinity;
+               (0., infinity), 3.,            make_interval 0. infinity;
+               (0., infinity), 8.,            make_interval 0. infinity;
+               (0., infinity), -2.,           make_interval 0. infinity;
+               (0., infinity), -3.,           make_interval 0. infinity;
+               (0., infinity), -8.,           make_interval 0. infinity;
+               (neg_infinity, 0.), 3.,        make_interval neg_infinity 0.;
+               (neg_infinity, 0.), 8.,        make_interval 0. infinity;
+               (neg_infinity, 0.), -2.,       make_interval 0. infinity;
+               (neg_infinity, 0.), -3.,       make_interval neg_infinity 0.;
+               (neg_infinity, 0.), -8.,       make_interval 0. infinity;
+               (-1., infinity), 8.,           make_interval 0. infinity;
+               (-1., infinity), -2.,          make_interval 0. infinity;
+               (-1., infinity), -3.,          entire_interval;
+               (-1., infinity), -8.,          make_interval 0. infinity;
+               (neg_infinity, 2.), 8.,        make_interval 0. infinity;
+               (neg_infinity, 2.), -2.,       make_interval 0. infinity;
+               (neg_infinity, 2.), -3.,       entire_interval;
+               (neg_infinity, 2.), -8.,       make_interval 0. infinity;              
+             ]
+
+let xxx () =
+  let f = test_pown_i in
+  run_test (test_f2 "pown_i (special)" f)
+           (special_data_f2 ());
+  run_test (test_f2 "pown_i" f)
            (standard_data_f2 ~n:samples ~sign:0)

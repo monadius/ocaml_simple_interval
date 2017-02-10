@@ -131,6 +131,48 @@ let xxx () =
            (standard_data_f ~n:samples ~sign:0)
 
 
+(* mid tests *)
+
+let test_mid_i ((a, b) as p) =
+  let v, tv = intervals_of_pair p in
+  let m = mid_i v in
+  if is_empty v then fact ("empty", is_nan m)
+  else
+    begin
+      fact ("in", v.low <= m && m <= v.high);
+      fact ("finite", neg_infinity < m && m < infinity);
+      if v.low = -.v.high then fact ("sym", m = 0.);
+    end;
+  true
+
+let () =
+  let f = fun (a, b) -> mid_i (make_interval a b) in
+  run_eq_f2 "mid_i (eq)" f [
+              (-0., 0.),                     0.;
+              (infinity, neg_infinity),      nan;
+              (neg_infinity, infinity),      0.;
+              (0., infinity),                max_float;
+              (neg_infinity, 0.),            -.max_float;
+              (-1., infinity),               max_float;
+              (neg_infinity, 2.),            -.max_float;
+              (-3., 3.),                     0.;
+              (max_float *. 0.5, max_float), max_float *. 0.75;
+              (4., 100.),                    52.;
+              (-3., 5.),                     1.;
+              (0., eta_float),               0.;
+              (eta_float, 2. *. eta_float),  2. *. eta_float;
+              (eta_float, eta_float),        eta_float;
+              (max_float, max_float),        max_float;
+            ]
+
+let () =
+  let f = test_mid_i in
+  run_test (test_f2 "mid_i (special)" f)
+           (special_data_f2 ());
+  run_test (test_f2 "mid_i" f)
+           (standard_data_f2 ~n:samples ~sign:0)
+
+
 (* neg tests *)
 
 let test_neg_i ((a, b) as p) =

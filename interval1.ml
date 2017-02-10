@@ -256,7 +256,19 @@ let zero_interval = {low = 0.0; high = 0.0}
 let one_interval = {low = 1.0; high = 1.0}
                   
 let make_interval a b = {low = a; high = b}
-                  
+
+let mid_i_fast {low = a; high = b} = 0.5 *. (a +. b)
+
+let mid_i {low = a; high = b} =
+  if a = neg_infinity then
+    if b = infinity then 0. else -.max_float
+  else if b = infinity then max_float
+  else
+    let m = 0.5 *. (a +. b) in
+    if m = infinity || m = neg_infinity then
+      0.5 *. a +. 0.5 *. b
+    else m
+                          
 let neg_i {low = a; high = b} = {
     low = -.b;
     high = -.a;

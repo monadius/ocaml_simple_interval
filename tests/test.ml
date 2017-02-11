@@ -3,6 +3,8 @@ exception Bad_fact of string
 let fact (str, b) = if not b then raise (Bad_fact str)
 
 let is_nan x = (compare x nan = 0)
+
+let is_finite x = neg_infinity < x && x < infinity && not (is_nan x)
                  
 (* Returns a random floating-point number.
    sign: specifies the sign of the result (0 denotes a random sign)

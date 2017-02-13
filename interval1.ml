@@ -238,8 +238,8 @@ let fpown_high x n =
 *)
                                                 
 type interval = {
-    low: float;
-    high: float;
+    low : float;
+    high : float;
   }
 
 let is_empty {low = a; high = b} = (a = infinity && b = neg_infinity)
@@ -251,9 +251,9 @@ let empty_interval = {low = infinity; high = neg_infinity}
 
 let entire_interval = {low = neg_infinity; high = infinity}
                        
-let zero_interval = {low = 0.0; high = 0.0}
+let zero_interval = {low = 0.; high = 0.}
 
-let one_interval = {low = 1.0; high = 1.0}
+let one_interval = {low = 1.; high = 1.}
                   
 let make_interval a b = {low = a; high = b}
 
@@ -276,11 +276,11 @@ let neg_i {low = a; high = b} = {
 
 let abs_i ({low = a; high = b} as v) =
   (* The first condition handles positive and empty intervals *)
-  if 0.0 <= a then v
-  else if b <= 0.0 then
+  if 0. <= a then v
+  else if b <= 0. then
     {low = -.b; high = -.a}
   else
-    {low = 0.0; high = max (-.a) b}
+    {low = 0.; high = max (-.a) b}
                  
 let add_ii {low = a; high = b} {low = c; high = d} =
   if a = infinity || c = infinity then empty_interval

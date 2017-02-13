@@ -70,7 +70,7 @@ let test_fsucc x =
     fact ("eq", compare y z = 0);
   true
                     
-let xxx () =
+let () =
   run_eq_f "fsucc (eq)" fsucc [
              -.0.0,                       eta_float;
              0.0,                         eta_float;
@@ -88,7 +88,7 @@ let xxx () =
              neg_infinity,                nan;
            ]
 
-let xxx () =
+let () =
   run_test (test_f "fsucc (special)" test_fsucc)
            (special_data_f ());
   run_test (test_f "fsucc" test_fsucc)
@@ -106,7 +106,7 @@ let test_fpred x =
     fact ("eq", compare y z = 0);
   true
                     
-let xxx () =
+let () =
   run_eq_f "fpred (eq)" fpred [
              -.0.0,                       -.eta_float;
              0.0,                         -.eta_float;
@@ -124,7 +124,7 @@ let xxx () =
              neg_infinity,                neg_infinity;
            ]
 
-let xxx () =
+let () =
   run_test (test_f "fpred (special)" test_fpred)
            (special_data_f ());
   run_test (test_f "fpred" test_fpred)
@@ -185,7 +185,7 @@ let test_neg_i ((a, b) as p) =
   end;
   true
 
-let xxx () =
+let () =
   let f = fun (a, b) -> neg_i (make_interval a b) in
   run_eq_f2 "neg_i (eq)" ~cmp:cmp_intervals f [
               (-0., 0.),                make_interval 0. 0.;
@@ -196,7 +196,7 @@ let xxx () =
               (-3., 2.),                make_interval (-2.) 3.;
             ]
     
-let xxx () =
+let () =
   let f = test_neg_i in
   run_test (test_f2 "neg_i (special)" f)
            (special_data_f2 ());
@@ -216,7 +216,7 @@ let test_abs_i ((a, b) as p) =
   end;
   true
 
-let xxx () =
+let () =
   let f = fun (a, b) -> abs_i (make_interval a b) in
   run_eq_f2 "abs_i (eq)" ~cmp:cmp_intervals f [
               (-0., 0.),                zero_interval;
@@ -229,7 +229,7 @@ let xxx () =
               (-3., -2.),               make_interval 2. 3.;
             ]
 
-let xxx () =
+let () =
   let f = test_abs_i in
   run_test (test_f2 "abs_i (special)" f)
            (special_data_f2 ());
@@ -269,7 +269,7 @@ let test_add_id_di ((a, b) as p) (c, _) =
   end;
   true
 
-let xxx () =
+let () =
   let f = fun (a, b) (c, d) -> add_ii (make_interval a b) (make_interval c d) in
   run_eq_f2f2 "add_ii (eq)" ~cmp:cmp_intervals f [
                 (0., 0.), (0., 0.), zero_interval;
@@ -282,14 +282,14 @@ let xxx () =
                 (neg_infinity, -1.), (0.1, infinity), entire_interval;
               ]
     
-let xxx () =
+let () =
   let f = test_add_ii in
   run_test (test_f2f2 "add_ii (special)" f)
            (special_data_f2f2 ());
   run_test (test_f2f2 "add_ii" f)
            (standard_data_f2f2 ~n:samples ~sign:0)
 
-let xxx () =
+let () =
   let f = test_add_id_di in
   run_test (test_f2f2 "add_id(di) (special)" f)
            (special_data_f2f2 ());
@@ -335,7 +335,7 @@ let test_sub_id_di ((a, b) as p) (c, _) =
   end;
   true
 
-let xxx () =
+let () =
   let f = fun (a, b) (c, d) -> sub_ii (make_interval a b) (make_interval c d) in
   run_eq_f2f2 "sub_ii (eq)" ~cmp:cmp_intervals f [
                 (0., 0.), (0., 0.), zero_interval;
@@ -348,14 +348,14 @@ let xxx () =
                 (neg_infinity, -1.), (neg_infinity, 0.1), entire_interval;
               ]
     
-let xxx () =
+let () =
   let f = test_sub_ii in
   run_test (test_f2f2 "sub_ii (special)" f)
            (special_data_f2f2 ());
   run_test (test_f2f2 "sub_ii" f)
            (standard_data_f2f2 ~n:samples ~sign:0)
 
-let xxx () =
+let () =
   let f = test_sub_id_di in
   run_test (test_f2f2 "sub_id(di) (special)" f)
            (special_data_f2f2 ());
@@ -394,7 +394,7 @@ let test_mul_id_di ((a, b) as p) (c, _) =
   end;
   true
 
-let xxx () =
+let () =
   let f = fun (a, b) (c, d) -> mul_ii (make_interval a b) (make_interval c d) in
   run_eq_f2f2 "mul_ii (eq)" ~cmp:cmp_intervals f [
         (0., 0.), (0., 0.), zero_interval;
@@ -409,14 +409,14 @@ let xxx () =
         (neg_infinity, -1.), (neg_infinity, 0.), make_interval 0. infinity;
               ]
     
-let xxx () =
+let () =
   let f = test_mul_ii in
   run_test (test_f2f2 "mul_ii (special)" f)
            (special_data_f2f2 ());
   run_test (test_f2f2 "mul_ii" f)
            (standard_data_f2f2 ~n:samples ~sign:0)
 
-let xxx () =
+let () =
   let f = test_mul_id_di in
   run_test (test_f2f2 "mul_id(di) (special)" f)
            (special_data_f2f2 ());
@@ -462,7 +462,7 @@ let test_div_id_di ((a, b) as p) (c, _) =
   end;
   true
 
-let xxx () =
+let () =
   let f = fun (a, b) (c, d) -> div_ii (make_interval a b) (make_interval c d) in
   run_eq_f2f2 "div_ii (eq)" ~cmp:cmp_intervals f [
         (0., 0.), (0., 0.), empty_interval;
@@ -482,14 +482,14 @@ let xxx () =
         (-1., 1.), (0., 1.), entire_interval;
               ]
     
-let xxx () =
+let () =
   let f = test_div_ii in
   run_test (test_f2f2 "div_ii (special)" f)
            (special_data_f2f2 ());
   run_test (test_f2f2 "div_ii" f)
            (standard_data_f2f2 ~n:samples ~sign:0)
 
-let xxx () =
+let () =
   let f = test_div_id_di in
   run_test (test_f2f2 "div_id(di) (special)" f)
            (special_data_f2f2 ());
@@ -512,7 +512,7 @@ let test_inv_i ((a, b) as p) =
   end;
   true
 
-let xxx () =
+let () =
   let f = fun (a, b) -> inv_i (make_interval a b) in
   run_eq_f2 "inv_i (eq)" ~cmp:cmp_intervals f [
               (-0., 0.),                empty_interval;
@@ -524,7 +524,7 @@ let xxx () =
               (-1., infinity),          entire_interval;
             ]
 
-let xxx () =
+let () =
   let f = test_inv_i in
   run_test (test_f2 "inv_i (special)" f)
            (special_data_f2 ());
@@ -547,7 +547,7 @@ let test_sqrt_i ((a, b) as p) =
   end;
   true
 
-let xxx () =
+let () =
   let f = fun (a, b) -> sqrt_i (make_interval a b) in
   run_eq_f2 "sqrt_i (eq)" ~cmp:cmp_intervals f [
               (-0., 0.),                zero_interval;
@@ -560,7 +560,7 @@ let xxx () =
               (-1., infinity),          make_interval 0. infinity;
             ]
 
-let xxx () =
+let () =
   let f = test_sqrt_i in
   run_test (test_f2 "sqrt_i (special)" f)
            (special_data_f2 ());
@@ -581,7 +581,7 @@ let test_sqr_i ((a, b) as p) =
   end;
   true
 
-let xxx () =
+let () =
   let f = fun (a, b) -> sqr_i (make_interval a b) in
   run_eq_f2 "sqr_i (eq)" ~cmp:cmp_intervals f [
               (-0., 0.),                zero_interval;
@@ -593,7 +593,7 @@ let xxx () =
               (neg_infinity, 2.),       make_interval 0. infinity;
             ]
 
-let xxx () =
+let () =
   let f = test_sqr_i in
   run_test (test_f2 "sqr_i (special)" f)
            (special_data_f2 ());
@@ -640,7 +640,7 @@ let test_pown_i ((a, b) as p) =
   end;
   true
 
-let xxx () =
+let () =
   let f = fun (a, b) e -> pown_i (make_interval a b) (int_of_float e) in
   run_eq_f2f "pown_i (eq)" ~cmp:cmp_intervals f [
                (-0., 0.), 3.,                 zero_interval;
@@ -674,7 +674,7 @@ let xxx () =
                (neg_infinity, 2.), -8.,       make_interval 0. infinity;              
              ]
 
-let xxx () =
+let () =
   let f = test_pown_i in
   run_test (test_f2 "pown_i (special)" f)
            (special_data_f2 ());

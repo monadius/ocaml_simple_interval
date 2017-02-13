@@ -181,7 +181,7 @@ let fadd_lo x y =
      r
   | _ -> 
      let r = num_of_float x +/ num_of_float y in
-     round_lo (x +. y) r
+     float_of_num_lo r
 
 let fadd_hi x y =
   match classify_float x, classify_float y with
@@ -194,7 +194,7 @@ let fadd_hi x y =
      r
   | _ ->
      let r = num_of_float x +/ num_of_float y in
-     round_hi (x +. y) r
+     float_of_num_hi r
 
 let fsub_lo x y = fadd_lo x (-.y)
 
@@ -211,7 +211,7 @@ let fmul_lo x y =
      else r
   | _ -> 
      let r = num_of_float x */ num_of_float y in
-     round_lo (x *. y) r
+     float_of_num_lo r
 
 let fmul_hi x y =
   match classify_float x, classify_float y with
@@ -224,7 +224,7 @@ let fmul_hi x y =
      else r
   | _ -> 
      let r = num_of_float x */ num_of_float y in
-     round_hi (x *. y) r
+     float_of_num_hi r
 
 let fdiv_lo x y =
   match classify_float x, classify_float y with
@@ -242,7 +242,7 @@ let fdiv_lo x y =
      else neg_infinity
   | _ -> 
      let r = num_of_float x // num_of_float y in
-     round_lo (x /. y) r
+     float_of_num_lo r
 
 let fdiv_hi x y =
   match classify_float x, classify_float y with
@@ -260,12 +260,13 @@ let fdiv_hi x y =
      else infinity
   | _ -> 
      let r = num_of_float x // num_of_float y in
-     round_hi (x /. y) r
+     float_of_num_hi r
 
 let fsqrt_lo x =
   match classify_float x with
   | FP_nan -> nan
-  | FP_infinite -> sqrt x
+  | FP_infinite ->
+     if x = infinity then max_float else sqrt x
   | FP_zero -> 0.0
   | _ ->
      if x < 0.0 then nan
@@ -330,8 +331,8 @@ let fpown_hi x n =
 (* [+infinity, -infinity] represents the only valid empty interval *)
 
 type ti = {
-    lo: float;
-    hi: float
+    lo : float;
+    hi : float
   }
 
 let empty_interval = {lo = infinity; hi = neg_infinity}

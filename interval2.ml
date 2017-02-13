@@ -421,8 +421,8 @@ let mul_ii {low = a; high = b} {low = c; high = d} =
       high = fmul_high a c;
     }
   else {
-      low = if a *. d < b *. c then fmul_low a d else fmul_low b c;
-      high = if a *. c > b *. d then fmul_high a c else fmul_high b d;
+      low = min (fmul_low a d) (fmul_low b c);
+      high = max (fmul_high a c) (fmul_high b d);
     }
       
 let mul_id {low = a; high = b} c =

@@ -1,3 +1,13 @@
+(* ========================================================================== *)
+(*      A simple OCaml interval library                                       *)
+(*      https://github.com/monadius/ocaml_simple_interval                     *)
+(*                                                                            *)
+(*      Author: Alexey Solovyev                                               *)
+(*      https://github.com/monadius                                           *)
+(*                                                                            *)
+(*      This file is distributed under the terms of the MIT licence           *)
+(* ========================================================================== *)
+
 open Num
 
 let u_float = ldexp 1.0 (-53)

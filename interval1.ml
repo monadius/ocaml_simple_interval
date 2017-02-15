@@ -1,3 +1,13 @@
+(* ========================================================================== *)
+(*      A simple OCaml interval library                                       *)
+(*      https://github.com/monadius/ocaml_simple_interval                     *)
+(*                                                                            *)
+(*      Author: Alexey Solovyev                                               *)
+(*      https://github.com/monadius                                           *)
+(*                                                                            *)
+(*      This file is distributed under the terms of the MIT licence           *)
+(* ========================================================================== *)
+
 let u_float = ldexp 1.0 (-53)
 
 let eta_float = ldexp 1.0 (-1074)
@@ -8,8 +18,16 @@ let min_float2 = 2.0 *. min_float
                
 let _ = assert (min_float = 0.5 *. (1.0 /. u_float) *. eta_float)
 let _ = assert (min_float2 = ldexp 1.0 (-1021))
+
+(* Make sure that the rounding mode is to nearest even *)
+let _ = assert (1.0 < 1.0 +. epsilon_float)
+let _ = assert (1.0 +. 0.5 *. epsilon_float = 1.0)
+let _ = assert (1.0 +. 0.75 *. epsilon_float = 1.0 +. epsilon_float)
+let _ = assert (1.0 -. 0.5 *. epsilon_float < 1.0)
+let _ = assert (1.0 -. 0.25 *. epsilon_float = 1.0)
+let _ = assert (1.0 -. 0.3 *. epsilon_float = 1.0 -. 0.5 *. epsilon_float)
                
-(* succ and pred from the RZBM09 paper *)
+(* fsucc and fpred from the [RZBM09] paper (see References in README.md)  *)
 (* Algorithm 1 *)
                
 let fsucc x =
@@ -243,6 +261,8 @@ type interval = {
   }
 
 let is_empty {low = a; high = b} = (a = infinity && b = neg_infinity)
+
+let is_entire {low; high} = (low = neg_infinity && high = infinity)
 
 let is_valid ({low = a; high = b} as v) =
   (a <= b && a < infinity && neg_infinity < b) || is_empty v
@@ -549,8 +569,8 @@ let log_i {low = a; high = b} =
   }
 
 let sin_i {low = a; high = b} =
-  failwith "Not implemented"
+  failwith "sin_i: Not implemented"
 
 let cos_i {low = a; high = b} =
-  failwith "Not implemented"
+  failwith "cos_i: Not implemented"
 

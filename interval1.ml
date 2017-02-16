@@ -41,27 +41,25 @@ let fpred x =
 let fadd_low x y =
   let r = x +. y in
   if r = infinity then max_float
-  (* TODO: replace with r = 0.0; 
-     should be faster and the accuracy is not important for subnormal results *)
-  else if -.min_float2 < r && r < min_float2 then r
+  else if r = 0. then r
   else fpred r
 
 let fadd_high x y =
   let r = x +. y in
   if r = neg_infinity then -.max_float
-  else if -.min_float2 < r && r < min_float2 then r
+  else if r = 0. then r
   else fsucc r
 
 let fsub_low x y =
   let r = x -. y in
   if r = infinity then max_float
-  else if -.min_float2 < r && r < min_float2 then r
+  else if r = 0. then r
   else fpred r
 
 let fsub_high x y =
   let r = x -. y in
   if r = neg_infinity then -.max_float
-  else if -.min_float2 < r && r < min_float2 then r
+  else if r = 0. then r
   else fsucc r
 
 let fmul_low x y =
@@ -300,7 +298,8 @@ let abs_i ({low = a; high = b} as v) =
   else if b <= 0. then
     {low = -.b; high = -.a}
   else
-    {low = 0.; high = max (-.a) b}
+    let a = -.a in
+    {low = 0.; high = if a <= b then b else a}
                  
 let add_ii {low = a; high = b} {low = c; high = d} =
   if a = infinity || c = infinity then empty_interval
@@ -363,8 +362,12 @@ let mul_ii {low = a; high = b} {low = c; high = d} =
       high = fmul_high a c;
     }
   else {
-      low = fpred (min (a *. d) (b *. c));
-      high = fsucc (max (a *. c) (b *. d));
+      low = (let ad = a *. d and
+                 bc = b *. c in
+             fpred (if ad <= bc then ad else bc));
+      high = (let ac = a *. c and
+                  bd = b *. d in
+              fsucc (if bd <= ac then ac else bd));
     }
       
 let mul_id {low = a; high = b} c =
@@ -501,7 +504,8 @@ let sqr_i {low = a; high = b} =
   else if b <= 0. then
     {low = fmul_low b b; high = fmul_high a a}
   else
-    let t = max (-.a) b in
+    let a = -.a in
+    let t = if a <= b then b else a in (* max (-.a) b *)
     {low = 0.; high = fsucc (t *. t)}
 
 let pown_i ({low = a; high = b} as v) n =
@@ -534,7 +538,8 @@ let pown_i ({low = a; high = b} as v) n =
             else if b <= 0. then
               {low = fpown_low b n; high = fpown_high a n}
             else
-              let t = max (-.a) b in
+              let a = -.a in
+              let t = if a <= b then b else a in (* max (-.a) b *)
               {low = 0.; high = fpown_high t n}
           end
         else begin
@@ -548,7 +553,7 @@ let pown_i ({low = a; high = b} as v) n =
                 high = if b = 0. then infinity else fpown_high b n;
               }
             else {
-                low = fpown_low (max (-.a) b) n;
+                low = fpown_low (let a = -.a in if a <= b then b else a) n;
                 high = infinity;
               }
           end

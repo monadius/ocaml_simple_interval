@@ -9,6 +9,8 @@ A simple and (hopefully) portable floating-point interval arithmetic library in 
 - F. Goualard 
   [*How do you compute the midpoint of an interval?*](https://hal.archives-ouvertes.fr/hal-00576641/document)
   
+- [*ValidatedNumerics.jl*](https://github.com/dpsanders/ValidatedNumerics.jl)
+  
 # Interval1
 
 [`Interval1`](interval1.mli) is a simple OCaml interval arithmetic

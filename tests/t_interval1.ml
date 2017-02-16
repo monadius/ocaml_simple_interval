@@ -1,4 +1,3 @@
-open Num
 open Test
 open Interval1
 
@@ -7,8 +6,6 @@ module T = Test_interval
 (* let () = Random.self_init () *)
 let samples = 1000
 
-let eta_float = ldexp 1.0 (-1074)
-                
 let intervals_of_pair =
   let intervals (a, b) =
     if is_nan a || is_nan b || (a = infinity && b = neg_infinity) ||

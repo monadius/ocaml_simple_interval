@@ -2,10 +2,12 @@ exception Bad_fact of string
 
 let fact (str, b) = if not b then raise (Bad_fact str)
 
+let eta_float = ldexp 1.0 (-1074)
+      
 let is_nan x = (compare x nan = 0)
 
 let is_finite x = neg_infinity < x && x < infinity && not (is_nan x)
-                 
+
 (* Returns a random floating-point number.
    sign: specifies the sign of the result (0 denotes a random sign)
    exp: the exponent of the result (does not always hold for very small results) *)
@@ -20,6 +22,14 @@ let rand_float sign exp =
 let stream_map f stream =
   let next i =
     try Some (f (Stream.next stream))
+    with Stream.Failure -> None in
+  Stream.from next
+
+let stream_filter p stream =
+  let rec next i =
+    try
+      let value = Stream.next stream in
+      if p value then Some value else next i
     with Stream.Failure -> None in
   Stream.from next
 
@@ -68,6 +78,14 @@ let stream_pairs stream =
     with Stream.Failure -> None in
   Stream.from next
 
+let rev_list_of_stream stream =
+  let result = ref [] in
+  Stream.iter (fun x -> result := x :: !result) stream;
+  !result
+
+let array_of_stream stream =
+  rev_list_of_stream stream |> List.rev |> Array.of_list
+              
 (* Streams of floating-point numbers *)
         
 (* Returns an n-element stream of random floating-point numbers
@@ -176,6 +194,36 @@ let run_test (test: 'a test) (data: 'a Stream.t) =
     Format.pp_print_newline fmt ()
   end
 
+let print_performance_header () =
+  Printf.printf "%-15s %12s %5s %12s %12s %12s\n%!"
+                "benchmark" "samples" "n" "mean" "sigma" "overhead"
+
+let run_performance_test ?(repeats = 10) ?(base_mean = 0.)
+                         ~name (f: 'a -> 'b) (data: 'a array) =
+  let run f data =
+    let n = Array.length data in
+    for i = 0 to n - 1 do
+      ignore (f data.(i))
+    done in
+  let rec run_tests (n, mean, m2) f data k =
+    if k > 0 then begin
+        let time =
+          let start = Unix.gettimeofday() in
+          run f data;
+          Unix.gettimeofday() -. start in
+        let delta = time -. mean in
+        let mean_new = mean +. delta /. (n +. 1.) in
+        let delta2 = time -. mean_new in
+        run_tests (n +. 1., mean_new, m2 +. delta *. delta2) f data (k - 1)
+      end
+    else (mean, if n < 2. then nan else m2 /. (n -. 1.)) in
+  let samples = Array.length data in
+  let mean, var = run_tests (0., 0., 0.) f data repeats in
+  let sigma = sqrt var in
+  Printf.printf "%-15s %12d %5d %12.5f %12.5f %12.5f\n%!"
+                name samples repeats mean sigma (mean -. base_mean);
+  mean, sigma
+
 let run_tests (test: 'a test) (data: 'a Stream.t list) =
   run_test test (stream_concat data)
 
@@ -249,12 +297,16 @@ let special_floats = [
     -.max_float;
     min_float;
     -.min_float;
+    min_float +. eta_float;
+    min_float -. eta_float;
+    -.min_float +. eta_float;
+    -.min_float -. eta_float;
     1.0;
     -.1.0;
     1.0 +. epsilon_float;
     -.(1.0 +. epsilon_float);
-    ldexp 1.0 (-1074);
-    -.(ldexp 1.0 (-1074));
+    eta_float;
+    -.eta_float;
     ldexp 1.0 (-1073);
     -.(ldexp 1.0 (-1073));
   ]
@@ -286,3 +338,9 @@ let standard_data_f2 ~n ~sign =
 
 let standard_data_f2f2 ~n ~sign =
   stream_pairs (standard_data_f2 (2 * n) sign)
+
+let performance_data_f ~n ~sign = rand_floats n sign (-30) (30)
+
+let performance_data_f2 ~n ~sign = stream_pairs (performance_data_f (2 * n) sign)
+
+let performance_data_f2f2 ~n ~sign = stream_pairs (performance_data_f2 (2 * n) sign)

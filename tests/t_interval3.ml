@@ -1,4 +1,3 @@
-open Num
 open Test
 open Interval3
 
@@ -6,8 +5,6 @@ module T = Test_interval
        
 (* let () = Random.self_init () *)
 let samples = 1000
-
-let eta_float = ldexp 1.0 (-1074)
 
 let intervals_of_pair =
   let intervals (a, b) =

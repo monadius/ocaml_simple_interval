@@ -192,7 +192,8 @@ let rec fpown_low_pos x n =
   | 3 -> fmul_low x (fsqr_low x)
   | 4 -> fsqr_low (fsqr_low x)
   | _ ->
-     if n land 1 = 0 then
+     if x = 0. then x
+     else if n land 1 = 0 then
        let t = fpown_low_pos x (n lsr 1) in
        fsqr_low t
      else
@@ -206,7 +207,8 @@ let rec fpown_high_pos x n =
   | 3 -> fmul_high x (fsqr_high x)
   | 4 -> fsqr_high (fsqr_high x)
   | _ ->
-     if n land 1 = 0 then
+     if x = 0. then x
+     else if n land 1 = 0 then
        let t = fpown_high_pos x (n lsr 1) in
        fsqr_high t
      else

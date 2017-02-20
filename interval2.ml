@@ -224,34 +224,47 @@ let fmul_high x y =
       let r = num_of_float x */ num_of_float y in
       round_hi z r
 
+let fdiv_low_pos x y =
+  assert (x >= 0. && y > 0.);
+  let z = x /. y in
+  if z = infinity then max_float
+  else if z = 0. then 0.
+  else
+    if fmul_high y z <= x then z else fpred z
+
+let fdiv_high_pos x y =
+  assert (x >= 0. && y > 0.);
+  let z = x /. y in
+  if z = infinity then infinity
+  else if z = 0. then
+    if x = 0. then 0. else eta_float
+  else
+    if x <= fmul_low y z then z else fsucc z
+    
 let fdiv_low x y =
-  if x = 0. then (if y <> 0. then 0. else nan)
-  else begin
-      let z = x /. y in
-      if z = infinity then max_float
-      else if z = neg_infinity then neg_infinity
-      else if z = 0. then
-        if (x >= 0. && y >= 0.) || (x <= 0. && y <= 0.) then 0.
-        else -.eta_float
-      else
-        let r = num_of_float x // num_of_float y in
-        round_lo z r
-    end
+  if x >= 0. then
+    if y >= 0. then
+      fdiv_low_pos x y
+    else
+      -.fdiv_high_pos x (-.y)
+  else
+    if y <= 0. then
+      fdiv_low_pos (-.x) (-.y)
+    else
+      -.fdiv_high_pos (-.x) y
 
 let fdiv_high x y =
-  if x = 0. then (if y <> 0. then 0. else nan)
-  else begin
-      let z = x /. y in
-      if z = neg_infinity then -.max_float
-      else if z = infinity then infinity
-      else if z = 0. then
-        if (x >= 0. && y <= 0.) || (x <= 0. && y >= 0.) then 0.
-        else eta_float
-      else
-        let r = num_of_float x // num_of_float y in
-        round_hi z r
-    end
-
+  if x >= 0. then
+    if y >= 0. then
+      fdiv_high_pos x y
+    else
+      -.fdiv_low_pos x (-.y)
+  else
+    if y <= 0. then
+      fdiv_high_pos (-.x) (-.y)
+    else
+      -.fdiv_low_pos (-.x) y
+      
 let sqr_product_err x xx =
   let px = x *. factor in
   let qx = x -. px in

@@ -190,6 +190,59 @@ let fmul_high x y =
         round_hi z r
     end
 
+let factor = ldexp 1. 27 +. 1.
+let max_product = fpred (ldexp 1. 1021)
+let min_product = fsucc (ldexp 1. (-969))
+let max_factor = ldexp 1. 995
+         
+let two_product_err x y xy =
+  let px = x *. factor in
+  let qx = x -. px in
+  let hx = px +. qx in
+  let tx = x -. hx in
+  let py = y *. factor in
+  let qy = y -. py in
+  let hy = py +. qy in
+  let ty = y -. hy in
+  let r2 = hx *. hy -. xy in
+  let r2 = r2 +. hx *. ty in
+  let r2 = r2 +. hy *. tx in
+  r2 +. tx *. ty
+
+let fmul_low x y =
+  if x = 0. || y = 0. then 0.
+  else
+    let z = x *. y in
+    let az = abs_float z in
+    if abs_float x <= max_factor && abs_float y <= max_factor
+       && min_product <= az && az <= max_product then
+      begin
+        let r = two_product_err x y z in
+        if r >= 0. then z else fpred z
+      end
+    else if z = infinity then max_float
+    else if z = neg_infinity then z
+    else
+      let r = num_of_float x */ num_of_float y in
+      round_lo z r
+
+let fmul_high x y =
+  if x = 0. || y = 0. then 0.
+  else
+    let z = x *. y in
+    let az = abs_float z in
+    if abs_float x <= max_factor && abs_float y <= max_factor
+       && min_product <= az && az <= max_product then
+      begin
+        let r = two_product_err x y z in
+        if r <= 0. then z else fsucc z
+      end
+    else if z = neg_infinity then -.max_float
+    else if z = infinity then z
+    else
+      let r = num_of_float x */ num_of_float y in
+      round_hi z r
+
 let fdiv_low x y =
   if x = 0. then (if y <> 0. then 0. else nan)
   else begin
@@ -226,7 +279,7 @@ let fsqrt_low x =
     let rx = num_of_float x and
         rz = num_of_float z in
     if compare_num (rz */ rz) rx > 0 then fpred z else z
-
+    
 let fsqrt_high x =
   if x < 0. then nan
   else if x = infinity then infinity
@@ -235,6 +288,20 @@ let fsqrt_high x =
     let rx = num_of_float x and
         rz = num_of_float z in
     if compare_num (rz */ rz) rx < 0 then fsucc z else z
+
+let fsqrt_low x =
+  if x < 0. then nan
+  else if x = infinity then max_float
+  else
+    let z = sqrt x in
+    if fmul_high z z <= x then z else fpred z
+
+let fsqrt_high x =
+  if x < 0. then nan
+  else if x = infinity then infinity
+  else
+    let z = sqrt x in
+    if fmul_low z z >= x then z else fsucc z
 
 (* We assume that x^0 = 1 for any x *)
 let fpown_low x n =

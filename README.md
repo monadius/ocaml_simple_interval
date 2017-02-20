@@ -15,6 +15,11 @@ Original repository: [https://github.com/monadius/ocaml_simple_interval](https:/
 
 - [*Java library for interval computations*](https://java.net/projects/jinterval)
 
+- S. Boldo, 
+  [*Dekker algorithm: error of the multiplication*](https://www.lri.fr/~sboldo/progs/Dekker.c.html). 
+  See also S. Boldo, C. Marché,
+  [*Formal verification of numerical programs: from C annotated programs to mechanical proofs*](https://hal.inria.fr/hal-00777605/document)
+
 # Interval1
 
 [`Interval1`](interval1.mli) is a simple OCaml interval arithmetic

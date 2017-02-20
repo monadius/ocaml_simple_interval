@@ -1,6 +1,6 @@
 open Num
 open Test
-open Interval2
+open Interval_tmp
 
 module T = Test_interval
        

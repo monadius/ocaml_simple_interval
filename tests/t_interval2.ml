@@ -1,5 +1,5 @@
 open Test
-open Interval3
+open Interval2
 
 module T = Test_interval
        

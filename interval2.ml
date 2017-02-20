@@ -29,7 +29,7 @@ let _ = assert (min_float2 = ldexp 1.0 (-1021))
 let _ = assert (bound1_float = ldexp 1.0 (-969))
 let _ = assert (bound2_float = ldexp 1.0 (-1021))
                
-(* succ and pred from the RZBM09 paper *)
+(* fsucc and fpred from the RZBM09 paper *)
 (* Algorithm 2 *)
                
 let fsucc x =
@@ -149,22 +149,20 @@ let round_lo z r =
   else
     let rz = num_of_float z in
     if compare_num rz r <= 0 then z else fpred z
-                          
+
+(* Correctly rounded fadd_low and fadd_high operations from JInterval *)
+                                               
 let fadd_low x y =
   let z = x +. y in
   if z = infinity then max_float
-  else if z = neg_infinity then z
   else
-    let r = num_of_float x +/ num_of_float y in
-    round_lo z r
-    
+    if y < z -. x || x < z -. y then fpred z else z
+
 let fadd_high x y =
   let z = x +. y in
   if z = neg_infinity then -.max_float
-  else if z = infinity then z
   else
-    let r = num_of_float x +/ num_of_float y in
-    round_hi z r
+    if z -. x < y || z -. y < x then fsucc z else z
 
 let fsub_low x y = fadd_low x (-.y)
 

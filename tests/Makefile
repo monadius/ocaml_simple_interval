@@ -15,10 +15,14 @@ interval1-opt:
 interval2:
 	ocamlc -o t_interval2 -I .. nums.cma unix.cma \
 		../interval2.ml test_interval.ml test.ml t_interval2.ml
+	ocamlc -o p_interval2 -I .. nums.cma unix.cma \
+		../interval2.ml test.ml p_interval2.ml
 
 interval2-opt:
 	ocamlopt -o t_interval2_opt -I .. nums.cmxa unix.cmxa \
 		../interval2.ml test_interval.ml test.ml t_interval2.ml
+	ocamlopt -o p_interval2_opt -I .. nums.cmxa unix.cmxa \
+		../interval2.ml test.ml p_interval2.ml
 
 interval-tmp:
 	ocamlc -o t_interval_tmp -I .. nums.cma unix.cma \

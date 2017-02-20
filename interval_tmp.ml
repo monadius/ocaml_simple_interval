@@ -16,6 +16,16 @@ let _ = assert (min_float = 0.5 *. (1.0 /. u_float) *. eta_float)
 let _ = assert (min_float2 = ldexp 1.0 (-1021))
 let _ = assert (bound1_float = ldexp 1.0 (-969))
 let _ = assert (bound2_float = ldexp 1.0 (-1021))
+
+(* Applies f to arg n times and returns the total execution time *)
+let test n f arg =
+  let start = Unix.gettimeofday() in
+  let result = f arg in
+    for i = 1 to n - 1 do
+      let _ = f arg in ()
+    done;
+    result, Unix.gettimeofday() -. start
+
                
 (* succ and pred from the RZBM09 paper *)
 (* Algorithm 2 *)
@@ -145,6 +155,74 @@ let fmul_high x y =
     else eta_float
   else
     if r <= 0. then z else fsucc z
+
+
+let f_test x y =
+  let z = x *. y in
+  let xb = Int64.bits_of_float x and
+      yb = Int64.bits_of_float y in
+  let xe = Int64.shift_right_logical xb 52 and
+      ye = Int64.shift_right_logical yb 52 in
+  xe, ye
+
+        
+let one51 = Int64.shift_left 1L 51
+let one52 = Int64.shift_left 1L 52
+let mask52 = Int64.sub one52 1L
+let one53 = Int64.shift_left 1L 53
+let mask53 = Int64.sub one53 1L
+let three51 = Int64.shift_left 3L 51
+let one54 = Int64.shift_left 1L 54
+let mask54 = Int64.sub one54 1L
+let three52 = Int64.shift_left 3L 52
+         
+let fmul_high64 x y =
+  if x = 0. || y = 0. then 0.
+  else begin
+      let z = x *. y in
+      if z = infinity then max_float
+      else
+        let xb = Int64.bits_of_float x and
+            yb = Int64.bits_of_float y in
+        let xe = Int64.to_int (Int64.shift_right_logical xb 52) and
+            ye = Int64.to_int (Int64.shift_right_logical yb 52) in
+        if xe <> 0 && xe < 0x7ff && ye <> 0 && ye < 0x7ff then
+          begin
+            let zb = Int64.bits_of_float z in
+            let ze = Int64.to_int (Int64.shift_right_logical zb 52) in
+            if ze <> 0 && ze < 0x7ff then
+              begin
+                let one52 = Int64.shift_left 1L 52 in
+                let mask52 = Int64.sub one52 1L in
+                let xs = Int64.logor one52 (Int64.logand xb mask52) and
+                    ys = Int64.logor one52 (Int64.logand yb mask52) in
+                let prod = Int64.mul xs ys in
+                let de = ze - xe - ye in
+                if de = -1023 then
+                  let prod = Int64.logand prod mask53 in
+                  if (prod > 0L && prod <= one51)
+                     || (prod > one52 && prod < three51) then fsucc z else z
+                else
+                  begin
+                    assert (de = -1022);
+                    let prod = Int64.logand prod mask54 in
+                    if (prod > 0L && prod <= one52)
+                       || (prod > one53 && prod < three52) then fsucc z else z
+                  end
+              end
+            else failwith "mul: z"
+          end
+        else failwith "mul: x y"
+    end
+
+let test1 =
+  let x, t = test 1000000 (fmul_high 0.1) 0.3 in
+  Printf.printf "test1: time = %f (%.20e)\n" t x
+
+let test64 =
+  let x, t = test 1000000 (fmul_high64 0.1) 0.3 in
+  Printf.printf "test64: time = %f (%.20e)\n" t x
+
 
 let fdiv_low x y =
   if x = 0. then (if y <> 0. then 0. else nan)

@@ -388,7 +388,7 @@ let test_mul_id_di ((a, b) as p) (c, _) =
   end;
   true
 
-let () =
+let xxx () =
   let f = fun (a, b) (c, d) -> mul_ii (make_interval a b) (make_interval c d) in
   run_eq_f2f2 "mul_ii (eq)" ~cmp:cmp_intervals f [
         (0., 0.), (0., 0.), zero_interval;
@@ -403,7 +403,7 @@ let () =
         (neg_infinity, -1.), (neg_infinity, 0.), make_interval 0. infinity;
               ]
     
-let () =
+let xxx () =
   let f = test_mul_ii in
   run_test (test_f2f2 "mul_ii (special)" f)
            (special_data_f2f2 ());

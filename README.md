@@ -1,5 +1,7 @@
 # ocaml_simple_interval
-A simple and (hopefully) portable floating-point interval arithmetic library in OCaml
+A simple and (hopefully) portable floating-point interval arithmetic library in OCaml.
+
+Original repository: [https://github.com/monadius/ocaml_simple_interval](https://github.com/monadius/ocaml_simple_interval)
 
 ## References
 

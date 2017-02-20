@@ -167,28 +167,9 @@ let fadd_high x y =
 let fsub_low x y = fadd_low x (-.y)
 
 let fsub_high x y = fadd_high x (-.y)
-                     
-let fmul_low x y =
-  if x = 0. || y = 0. then 0.
-  else begin
-      let z = x *. y in
-      if z = infinity then max_float
-      else if z = neg_infinity then z
-      else
-        let r = num_of_float x */ num_of_float y in
-        round_lo z r
-    end
 
-let fmul_high x y =
-  if x = 0. || y = 0. then 0.
-  else begin
-      let z = x *. y in
-      if z = neg_infinity then -.max_float
-      else if z = infinity then z
-      else
-        let r = num_of_float x */ num_of_float y in
-        round_hi z r
-    end
+(* Correctly rounded fmul_low and fmul_high are based on results from
+   S. Boldo's formal verification of Dekker algorithm *)
 
 let factor = ldexp 1. 27 +. 1.
 let max_product = fpred (ldexp 1. 1021)
@@ -271,44 +252,61 @@ let fdiv_high x y =
         round_hi z r
     end
 
+let sqr_product_err x xx =
+  let px = x *. factor in
+  let qx = x -. px in
+  let hx = px +. qx in
+  let tx = x -. hx in
+  let r2 = hx *. hx -. xx in
+  let r2 = r2 +. hx *. tx in
+  let r2 = r2 +. hx *. tx in
+  r2 +. tx *. tx
+
+let fsqr_low x =
+  let z = x *. x in
+  if min_product <= z && z <= max_product then
+    let r = sqr_product_err x z in
+    if r >= 0. then z else fpred z
+  else if z = 0. then 0.
+  else if z = infinity then max_float
+  else
+    let t = num_of_float x in
+    let r = t */ t in
+    round_lo z r
+
+let fsqr_high x =
+  let z = x *. x in
+  if min_product <= z && z <= max_product then
+    let r = sqr_product_err x z in
+    if r <= 0. then z else fsucc z
+  else if z = 0. then
+    if x = 0. then 0. else eta_float
+  else if z = infinity then z
+  else
+    let t = num_of_float x in
+    let r = t */ t in
+    round_hi z r
+         
 let fsqrt_low x =
   if x < 0. then nan
   else if x = infinity then max_float
   else
     let z = sqrt x in
-    let rx = num_of_float x and
-        rz = num_of_float z in
-    if compare_num (rz */ rz) rx > 0 then fpred z else z
-    
-let fsqrt_high x =
-  if x < 0. then nan
-  else if x = infinity then infinity
-  else
-    let z = sqrt x in
-    let rx = num_of_float x and
-        rz = num_of_float z in
-    if compare_num (rz */ rz) rx < 0 then fsucc z else z
-
-let fsqrt_low x =
-  if x < 0. then nan
-  else if x = infinity then max_float
-  else
-    let z = sqrt x in
-    if fmul_high z z <= x then z else fpred z
+    if fsqr_high z <= x then z else fpred z
 
 let fsqrt_high x =
   if x < 0. then nan
   else if x = infinity then infinity
   else
     let z = sqrt x in
-    if fmul_low z z >= x then z else fsucc z
+    if fsqr_low z >= x then z else fsucc z
 
 (* We assume that x^0 = 1 for any x *)
 let fpown_low x n =
   match n with
   | 0 -> 1.
   | 1 -> x
-  | 2 -> fmul_low x x
+  | 2 -> fsqr_low x
   | n when x = 0. -> if n < 0 then nan else 0.
   | n when is_finite x ->
      let r = num_of_float x **/ Int n in
@@ -324,7 +322,7 @@ let fpown_high x n =
   match n with
   | 0 -> 1.
   | 1 -> x
-  | 2 -> fmul_high x x
+  | 2 -> fsqr_high x
   | n when x = 0. -> if n < 0 then nan else 0.
   | n when is_finite x ->
      let r = num_of_float x **/ Int n in
@@ -559,12 +557,12 @@ let sqrt_i ({low = a; high = b} as v) =
 let sqr_i ({low = a; high = b} as v) =
   if is_empty v then empty_interval
   else if a >= 0. then
-    {low = fmul_low a a; high = fmul_high b b}
+    {low = fsqr_low a; high = fsqr_high b}
   else if b <= 0. then
-    {low = fmul_low b b; high = fmul_high a a}
+    {low = fsqr_low b; high = fsqr_high a}
   else
     let t = max (-.a) b in
-    {low = 0.; high = fmul_high t t}
+    {low = 0.; high = fsqr_high t}
 
 let pown_i ({low = a; high = b} as v) n =
   if is_empty v then empty_interval
@@ -573,6 +571,7 @@ let pown_i ({low = a; high = b} as v) n =
     | 0 -> one_interval
     | 1 -> v
     | 2 -> sqr_i v
+    | -1 -> inv_i v
     | n when (n land 1 = 1) -> begin
         if n > 0 then
           {low = fpown_low a n; high = fpown_high b n}

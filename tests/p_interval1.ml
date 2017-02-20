@@ -129,6 +129,9 @@ let () =
   let base_mean, _ = run_ff "/." ( /. ) in
   ignore @@ run_ff "fdiv_low" ~base_mean  fdiv_low;
   ignore @@ run_ff "fdiv_high" ~base_mean fdiv_high;
+  let base_mean, _ = run_f "sqr" (fun x -> x *. x) in
+  ignore @@ run_f "fsqr_low" ~base_mean fsqr_low;
+  ignore @@ run_f "fsqr_high" ~base_mean fsqr_high;
   let base_mean, _ = run_f "sqrt" sqrt in
   ignore @@ run_f_pos "fsqrt_low" ~base_mean fsqrt_low;
   ignore @@ run_f_pos "fsqrt_high" ~base_mean fsqrt_high;

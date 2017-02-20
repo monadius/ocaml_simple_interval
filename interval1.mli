@@ -162,6 +162,12 @@ val fdiv_low : float -> float -> float
 (** Returns an upper bound of the ratio of two floating-point numbers *)
 val fdiv_high : float -> float -> float
 
+(** Returns a lower bound of [x^2] *)
+val fsqr_low : float -> float
+
+(** Returns an upper bound of [x^2] *)
+val fsqr_high : float -> float
+
 (** Returns a lower bound of [sqrt x] *)
 val fsqrt_low : float -> float
 

@@ -106,6 +106,16 @@ let fdiv_high x y =
     else
       fsucc r
 
+let fsqr_low x =
+  let r = x *. x in
+  if r = infinity then max_float
+  else if r = 0. then 0.
+  else
+    fpred r
+
+let fsqr_high x =
+  if x = 0. then 0. else fsucc (x *. x)
+
 let fsqrt_low x =
   if x = 0. then 0.
   else
@@ -113,7 +123,8 @@ let fsqrt_low x =
     if r = infinity then max_float
     else fpred r
 
-let fsqrt_high x = if x = 0. then 0. else fsucc (sqrt x)
+let fsqrt_high x =
+  if x = 0. then 0. else fsucc (sqrt x)
 
 let fexp_low x =
   let r = exp x in
@@ -175,31 +186,37 @@ let fsin_high x =
                           
 let rec fpown_low_pos x n =
   assert (x >= 0. && n > 0);
-  if n = 1 || x = 0. then x
-  else if n = 2 then fmul_low x x
-  else if n = 3 then fmul_low x (fmul_low x x)
-  else if n land 1 = 0 then
-    let t = fpown_low_pos x (n lsr 1) in
-    fmul_low t t
-  else
-    fmul_low x (fpown_low_pos x (n - 1))
+  match n with
+  | 1 -> x
+  | 2 -> fsqr_low x
+  | 3 -> fmul_low x (fsqr_low x)
+  | 4 -> fsqr_low (fsqr_low x)
+  | _ ->
+     if n land 1 = 0 then
+       let t = fpown_low_pos x (n lsr 1) in
+       fsqr_low t
+     else
+       fmul_low x (fpown_low_pos x (n - 1))
 
 let rec fpown_high_pos x n =
   assert (x >= 0. && n > 0);
-  if n = 1 || x = 0. then x
-  else if n = 2 then fmul_high x x
-  else if n = 3 then fmul_high x (fmul_high x x)
-  else if n land 1 = 0 then
-    let t = fpown_high_pos x (n lsr 1) in
-    fmul_high t t
-  else
-    fmul_high x (fpown_high_pos x (n - 1))
+  match n with
+  | 1 -> x
+  | 2 -> fsqr_high x
+  | 3 -> fmul_high x (fsqr_high x)
+  | 4 -> fsqr_high (fsqr_high x)
+  | _ ->
+     if n land 1 = 0 then
+       let t = fpown_high_pos x (n lsr 1) in
+       fsqr_high t
+     else
+       fmul_high x (fpown_high_pos x (n - 1))
 
 let fpown_low x n =
   match n with
   | 0 -> 1.
   | 1 -> x
-  | 2 -> fmul_low x x
+  | 2 -> fsqr_low x
   | n when (n land 1 = 0) || x >= 0. -> begin
       let a = abs_float x in
       if n > 0 then
@@ -225,7 +242,7 @@ let fpown_high x n =
   match n with
   | 0 -> 1.
   | 1 -> x
-  | 2 -> fmul_high x x
+  | 2 -> fsqr_high x
   | n when (n land 1 = 0) || x >= 0. -> begin
       let a = abs_float x in
       if n > 0 then
@@ -500,9 +517,9 @@ let sqrt_i {low = a; high = b} =
 let sqr_i {low = a; high = b} =
   if a = infinity then empty_interval
   else if a >= 0. then
-    {low = fmul_low a a; high = fmul_high b b}
+    {low = fsqr_low a; high = fsqr_high b}
   else if b <= 0. then
-    {low = fmul_low b b; high = fmul_high a a}
+    {low = fsqr_low b; high = fsqr_high a}
   else
     let a = -.a in
     let t = if a <= b then b else a in (* max (-.a) b *)

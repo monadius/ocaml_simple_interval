@@ -5,7 +5,7 @@
 (*      Author: Alexey Solovyev                                               *)
 (*      https://github.com/monadius                                           *)
 (*                                                                            *)
-(*      This file is distributed under the terms of the MIT licence           *)
+(*      This file is distributed under the terms of the MIT license           *)
 (* ========================================================================== *)
 
 (** A simple OCaml interval library.
@@ -21,9 +21,8 @@
    Intervals computed with this library are optimal floating-point
    intervals for basic arithmetic operations. 
 
-   This library is slow because it uses rational arithmetic
-   internally. {!Interval1} provides much faster inerval functions
-   which are only slightly less optimal.
+   {!Interval1} provides faster interval functions which are only
+   slightly less optimal.
 *)
 
 (** The interval type *)

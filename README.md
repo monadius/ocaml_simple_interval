@@ -32,12 +32,12 @@ most cases the error is no more than 1 ulp for each interval endpoint.
 # Interval2
 
 [`Interval2`](interval2.mli) is another simple OCaml interval
-arithmetic library. It uses standard rational arithmetic operations to
-compute optimal floating-point intervals for basic arithmetic
-operations. It is substantially slower than `Interval1` but it may be
-used in cases when optimal intervals are required (for instance, when
-point intervals play an important role or when discontinuous functions
-are considered).
+arithmetic library. It computes optimal floating-point intervals for
+basic arithmetic operations. In some cases, it performs computations
+with rational arithmetic. This library is slower than `Interval1` but
+it may be used in cases when optimal intervals are required (for
+instance, when point intervals play an important role or when
+discontinuous functions are considered).
 
 # Docs
 

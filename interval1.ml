@@ -5,7 +5,7 @@
 (*      Author: Alexey Solovyev                                               *)
 (*      https://github.com/monadius                                           *)
 (*                                                                            *)
-(*      This file is distributed under the terms of the MIT licence           *)
+(*      This file is distributed under the terms of the MIT license           *)
 (* ========================================================================== *)
 
 let u_float = ldexp 1.0 (-53)

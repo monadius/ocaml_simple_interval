@@ -5,7 +5,7 @@
 (*      Author: Alexey Solovyev                                               *)
 (*      https://github.com/monadius                                           *)
 (*                                                                            *)
-(*      This file is distributed under the terms of the MIT licence           *)
+(*      This file is distributed under the terms of the MIT license           *)
 (* ========================================================================== *)
 
 open Num
@@ -643,7 +643,7 @@ let log_i ({low = a; high = b} as v) =
   }
 
 let sin_i {low = a; high = b} =
-  failwith "Not implemented"
+  failwith "sin_i: Not implemented"
 
 let cos_i {low = a; high = b} =
-  failwith "Not implemented"
+  failwith "cos_i: Not implemented"

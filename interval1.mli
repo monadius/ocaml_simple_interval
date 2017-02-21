@@ -5,7 +5,7 @@
 (*      Author: Alexey Solovyev                                               *)
 (*      https://github.com/monadius                                           *)
 (*                                                                            *)
-(*      This file is distributed under the terms of the MIT licence           *)
+(*      This file is distributed under the terms of the MIT license           *)
 (* ========================================================================== *)
 
 (** A simple OCaml interval library.

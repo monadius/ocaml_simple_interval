@@ -36,12 +36,14 @@ val empty_interval : interval
 (** The entire interval representing (-infinity, infinity) *)
 val entire_interval : interval
 
-(** [[0, 0]] *)
+(** [[0., 0.]] *)
 val zero_interval : interval
 
-(** [[1, 1]] *)
+(** [[1., 1.]] *)
 val one_interval : interval
 
+(** {6 Interval operations} *)
+                     
 (** Creates an interval from given endpoints *)
 val make_interval : float -> float -> interval
 
@@ -52,7 +54,7 @@ val is_empty : interval -> bool
 val is_entire : interval -> bool
 
 (** Tests if an interval is valid. A valid interval is either empty
-    or [[a, b]] with [a <= b], [a < infinity], [-infinity < b]. *)
+   or [[a, b]] with [a <= b], [a < infinity], [-infinity < b]. *)
 val is_valid : interval -> bool
                   
 (** Computes a midpoint of an interval as [(a + b) / 2].  This function
@@ -70,6 +72,12 @@ val neg_i : interval -> interval
 (** Interval absolute value *)
 val abs_i : interval -> interval
 
+(** Interval maximum *)
+val max_ii : interval -> interval -> interval
+
+(** Interval minimum *)
+val min_ii : interval -> interval -> interval
+                           
 (** Interval addition *)
 val add_ii : interval -> interval -> interval
 
@@ -118,19 +126,21 @@ val sqr_i : interval -> interval
 (** Interval integer power *)
 val pown_i : interval -> int -> interval
 
-(** Interval exponential function *)
+(** Interval exponential function. It is assumed that the standard
+   function [exp:float->float] has less than 1 ulp error. *)
 val exp_i : interval -> interval
 
-(** Interval natural logarithm *)
+(** Interval natural logarithm. It is assumed that the standard
+   function [log:float->float] has less than 1 ulp error. *)
 val log_i : interval -> interval
 
-(** Interval sine *)
+(** Interval sine (not implemented yet) *)
 val sin_i : interval -> interval
 
-(** Interval cosine *)
+(** Interval cosine (not implemented yet) *)
 val cos_i : interval -> interval
 
-(** Floating-point operations with directed rounding *)
+(** {6 Floating-point operations with directed rounding} *)
 
 (** Computes a successor of a floating-point number *)
 val fsucc : float -> float

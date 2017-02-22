@@ -10,7 +10,9 @@
 <link title="Index of values" rel=Appendix href="index_values.html">
 <link title="Index of modules" rel=Appendix href="index_modules.html">
 <link title="Interval1" rel="Chapter" href="Interval1.html">
-<link title="Interval2" rel="Chapter" href="Interval2.html"><title>Interval2</title>
+<link title="Interval2" rel="Chapter" href="Interval2.html"><link title="Interval operations" rel="Section" href="#6_Intervaloperations">
+<link title="Floating-point operations with directed rounding" rel="Section" href="#6_Floatingpointoperationswithdirectedrounding">
+<title>Interval2</title>
 </head>
 <body>
 <div class="navbar"><a class="pre" href="Interval1.html" title="Interval1">Previous</a>
@@ -73,12 +75,14 @@ The entire interval representing (-infinity, infinity)<br>
 </div>
 
 <pre><span id="VALzero_interval"><span class="keyword">val</span> zero_interval</span> : <code class="type"><a href="Interval2.html#TYPEinterval">interval</a></code></pre><div class="info ">
-<code class="code">[0, 0]</code><br>
+<code class="code">[0., 0.]</code><br>
 </div>
 
 <pre><span id="VALone_interval"><span class="keyword">val</span> one_interval</span> : <code class="type"><a href="Interval2.html#TYPEinterval">interval</a></code></pre><div class="info ">
-<code class="code">[1, 1]</code><br>
+<code class="code">[1., 1.]</code><br>
 </div>
+<br>
+<h6 id="6_Intervaloperations">Interval operations</h6><br>
 
 <pre><span id="VALmake_interval"><span class="keyword">val</span> make_interval</span> : <code class="type">float -> float -> <a href="Interval2.html#TYPEinterval">interval</a></code></pre><div class="info ">
 Creates an interval from given endpoints<br>
@@ -94,7 +98,7 @@ Tests if an interval is the entire interval<br>
 
 <pre><span id="VALis_valid"><span class="keyword">val</span> is_valid</span> : <code class="type"><a href="Interval2.html#TYPEinterval">interval</a> -> bool</code></pre><div class="info ">
 Tests if an interval is valid. A valid interval is either empty
-    or <code class="code">[a, b]</code> with <code class="code">a &lt;= b</code>, <code class="code">a &lt; infinity</code>, <code class="code">-infinity &lt; b</code>.<br>
+   or <code class="code">[a, b]</code> with <code class="code">a &lt;= b</code>, <code class="code">a &lt; infinity</code>, <code class="code">-infinity &lt; b</code>.<br>
 </div>
 
 <pre><span id="VALmid_i"><span class="keyword">val</span> mid_i</span> : <code class="type"><a href="Interval2.html#TYPEinterval">interval</a> -> float</code></pre><div class="info ">
@@ -103,149 +107,166 @@ Computes a midpoint of an interval. This function returns finite
 </div>
 
 <pre><span id="VALneg_i"><span class="keyword">val</span> neg_i</span> : <code class="type"><a href="Interval2.html#TYPEinterval">interval</a> -> <a href="Interval2.html#TYPEinterval">interval</a></code></pre><div class="info ">
-Interval negation<br>
+Interval negation <b>(optimal)</b><br>
 </div>
 
 <pre><span id="VALabs_i"><span class="keyword">val</span> abs_i</span> : <code class="type"><a href="Interval2.html#TYPEinterval">interval</a> -> <a href="Interval2.html#TYPEinterval">interval</a></code></pre><div class="info ">
-Interval absolute value<br>
+Interval absolute value <b>(optimal)</b><br>
+</div>
+
+<pre><span id="VALmax_ii"><span class="keyword">val</span> max_ii</span> : <code class="type"><a href="Interval2.html#TYPEinterval">interval</a> -> <a href="Interval2.html#TYPEinterval">interval</a> -> <a href="Interval2.html#TYPEinterval">interval</a></code></pre><div class="info ">
+Interval maximum <b>(optimal)</b><br>
+</div>
+
+<pre><span id="VALmin_ii"><span class="keyword">val</span> min_ii</span> : <code class="type"><a href="Interval2.html#TYPEinterval">interval</a> -> <a href="Interval2.html#TYPEinterval">interval</a> -> <a href="Interval2.html#TYPEinterval">interval</a></code></pre><div class="info ">
+Interval minimum <b>(optimal)</b><br>
 </div>
 
 <pre><span id="VALadd_ii"><span class="keyword">val</span> add_ii</span> : <code class="type"><a href="Interval2.html#TYPEinterval">interval</a> -> <a href="Interval2.html#TYPEinterval">interval</a> -> <a href="Interval2.html#TYPEinterval">interval</a></code></pre><div class="info ">
-Interval addition<br>
+Interval addition <b>(optimal)</b><br>
 </div>
 
 <pre><span id="VALadd_id"><span class="keyword">val</span> add_id</span> : <code class="type"><a href="Interval2.html#TYPEinterval">interval</a> -> float -> <a href="Interval2.html#TYPEinterval">interval</a></code></pre><div class="info ">
-Addition of an interval and a number<br>
+Addition of an interval and a number <b>(optimal)</b><br>
 </div>
 
 <pre><span id="VALadd_di"><span class="keyword">val</span> add_di</span> : <code class="type">float -> <a href="Interval2.html#TYPEinterval">interval</a> -> <a href="Interval2.html#TYPEinterval">interval</a></code></pre><div class="info ">
-Addition of a number and an interval<br>
+Addition of a number and an interval <b>(optimal)</b><br>
 </div>
 
 <pre><span id="VALsub_ii"><span class="keyword">val</span> sub_ii</span> : <code class="type"><a href="Interval2.html#TYPEinterval">interval</a> -> <a href="Interval2.html#TYPEinterval">interval</a> -> <a href="Interval2.html#TYPEinterval">interval</a></code></pre><div class="info ">
-Interval subtraction<br>
+Interval subtraction <b>(optimal)</b><br>
 </div>
 
 <pre><span id="VALsub_id"><span class="keyword">val</span> sub_id</span> : <code class="type"><a href="Interval2.html#TYPEinterval">interval</a> -> float -> <a href="Interval2.html#TYPEinterval">interval</a></code></pre><div class="info ">
-Subtraction of an interval and a number<br>
+Subtraction of an interval and a number <b>(optimal)</b><br>
 </div>
 
 <pre><span id="VALsub_di"><span class="keyword">val</span> sub_di</span> : <code class="type">float -> <a href="Interval2.html#TYPEinterval">interval</a> -> <a href="Interval2.html#TYPEinterval">interval</a></code></pre><div class="info ">
-Subtraction of a number and an interval<br>
+Subtraction of a number and an interval <b>(optimal)</b><br>
 </div>
 
 <pre><span id="VALmul_ii"><span class="keyword">val</span> mul_ii</span> : <code class="type"><a href="Interval2.html#TYPEinterval">interval</a> -> <a href="Interval2.html#TYPEinterval">interval</a> -> <a href="Interval2.html#TYPEinterval">interval</a></code></pre><div class="info ">
-Interval multiplication<br>
+Interval multiplication <b>(optimal)</b><br>
 </div>
 
 <pre><span id="VALmul_id"><span class="keyword">val</span> mul_id</span> : <code class="type"><a href="Interval2.html#TYPEinterval">interval</a> -> float -> <a href="Interval2.html#TYPEinterval">interval</a></code></pre><div class="info ">
-Multiplication of an interval and a number<br>
+Multiplication of an interval and a number <b>(optimal)</b><br>
 </div>
 
 <pre><span id="VALmul_di"><span class="keyword">val</span> mul_di</span> : <code class="type">float -> <a href="Interval2.html#TYPEinterval">interval</a> -> <a href="Interval2.html#TYPEinterval">interval</a></code></pre><div class="info ">
-Multiplication of a number and an interval<br>
+Multiplication of a number and an interval <b>(optimal)</b><br>
 </div>
 
 <pre><span id="VALdiv_ii"><span class="keyword">val</span> div_ii</span> : <code class="type"><a href="Interval2.html#TYPEinterval">interval</a> -> <a href="Interval2.html#TYPEinterval">interval</a> -> <a href="Interval2.html#TYPEinterval">interval</a></code></pre><div class="info ">
-Interval division<br>
+Interval division <b>(optimal)</b><br>
 </div>
 
 <pre><span id="VALdiv_id"><span class="keyword">val</span> div_id</span> : <code class="type"><a href="Interval2.html#TYPEinterval">interval</a> -> float -> <a href="Interval2.html#TYPEinterval">interval</a></code></pre><div class="info ">
-Division of an interval by a number<br>
+Division of an interval by a number <b>(optimal)</b><br>
 </div>
 
 <pre><span id="VALdiv_di"><span class="keyword">val</span> div_di</span> : <code class="type">float -> <a href="Interval2.html#TYPEinterval">interval</a> -> <a href="Interval2.html#TYPEinterval">interval</a></code></pre><div class="info ">
-Division of a number by an interval<br>
+Division of a number by an interval <b>(optimal)</b><br>
 </div>
 
 <pre><span id="VALinv_i"><span class="keyword">val</span> inv_i</span> : <code class="type"><a href="Interval2.html#TYPEinterval">interval</a> -> <a href="Interval2.html#TYPEinterval">interval</a></code></pre><div class="info ">
-Interval reciprocal<br>
+Interval reciprocal <b>(optimal)</b><br>
 </div>
 
 <pre><span id="VALsqrt_i"><span class="keyword">val</span> sqrt_i</span> : <code class="type"><a href="Interval2.html#TYPEinterval">interval</a> -> <a href="Interval2.html#TYPEinterval">interval</a></code></pre><div class="info ">
-Interval square root<br>
+Interval square root <b>(optimal)</b><br>
 </div>
 
 <pre><span id="VALsqr_i"><span class="keyword">val</span> sqr_i</span> : <code class="type"><a href="Interval2.html#TYPEinterval">interval</a> -> <a href="Interval2.html#TYPEinterval">interval</a></code></pre><div class="info ">
-Interval square<br>
+Interval square <b>(optimal)</b><br>
 </div>
 
 <pre><span id="VALpown_i"><span class="keyword">val</span> pown_i</span> : <code class="type"><a href="Interval2.html#TYPEinterval">interval</a> -> int -> <a href="Interval2.html#TYPEinterval">interval</a></code></pre><div class="info ">
-Interval integer power<br>
+Interval integer power. This function returns an optimal interval
+    but this behavior may change in the future.<br>
 </div>
 
 <pre><span id="VALexp_i"><span class="keyword">val</span> exp_i</span> : <code class="type"><a href="Interval2.html#TYPEinterval">interval</a> -> <a href="Interval2.html#TYPEinterval">interval</a></code></pre><div class="info ">
-Interval exponential function<br>
+Interval exponential function. It is assumed that the standard
+   function <code class="code">exp:float-&gt;float</code> has less than 1 ulp error.<br>
 </div>
 
 <pre><span id="VALlog_i"><span class="keyword">val</span> log_i</span> : <code class="type"><a href="Interval2.html#TYPEinterval">interval</a> -> <a href="Interval2.html#TYPEinterval">interval</a></code></pre><div class="info ">
-Interval natural logarithm<br>
+Interval natural logarithm. It is assumed that the standard
+   function <code class="code">log:float-&gt;float</code> has less than 1 ulp error.<br>
 </div>
 
 <pre><span id="VALsin_i"><span class="keyword">val</span> sin_i</span> : <code class="type"><a href="Interval2.html#TYPEinterval">interval</a> -> <a href="Interval2.html#TYPEinterval">interval</a></code></pre><div class="info ">
-Interval sine<br>
+Interval sine (not implemented yet)<br>
 </div>
 
 <pre><span id="VALcos_i"><span class="keyword">val</span> cos_i</span> : <code class="type"><a href="Interval2.html#TYPEinterval">interval</a> -> <a href="Interval2.html#TYPEinterval">interval</a></code></pre><div class="info ">
-Interval cosine<br>
+Interval cosine (not implemented yet)<br>
 </div>
 <br>
-Floating-point operations with directed rounding<br>
+<h6 id="6_Floatingpointoperationswithdirectedrounding">Floating-point operations with directed rounding</h6><br>
 
 <pre><span id="VALfsucc"><span class="keyword">val</span> fsucc</span> : <code class="type">float -> float</code></pre><div class="info ">
-Computes a successor of a floating-point number<br>
+Computes a successor of a floating-point number <b>(optimal)</b><br>
 </div>
 
 <pre><span id="VALfpred"><span class="keyword">val</span> fpred</span> : <code class="type">float -> float</code></pre><div class="info ">
-Computes a predecessor of a floating-point number<br>
+Computes a predecessor of a floating-point number <b>(optimal)</b><br>
 </div>
 
 <pre><span id="VALfadd_low"><span class="keyword">val</span> fadd_low</span> : <code class="type">float -> float -> float</code></pre><div class="info ">
-Returns a lower bound of the sum of two floating-point numbers<br>
+Returns a lower bound of the sum of two floating-point numbers <b>   (optimal)</b><br>
 </div>
 
 <pre><span id="VALfadd_high"><span class="keyword">val</span> fadd_high</span> : <code class="type">float -> float -> float</code></pre><div class="info ">
-Returns an upper bound of the sum of two floating-point numbers<br>
+Returns an upper bound of the sum of two floating-point numbers <b>   (optimal)</b><br>
 </div>
 
 <pre><span id="VALfsub_low"><span class="keyword">val</span> fsub_low</span> : <code class="type">float -> float -> float</code></pre><div class="info ">
-Returns a lower bound of the difference of two floating-point numbers<br>
+Returns a lower bound of the difference of two floating-point
+   numbers <b>(optimal)</b><br>
 </div>
 
 <pre><span id="VALfsub_high"><span class="keyword">val</span> fsub_high</span> : <code class="type">float -> float -> float</code></pre><div class="info ">
-Returns an upper bound of the difference of two floating-point numbers<br>
+Returns an upper bound of the difference of two floating-point
+   numbers <b>(optimal)</b><br>
 </div>
 
 <pre><span id="VALfmul_low"><span class="keyword">val</span> fmul_low</span> : <code class="type">float -> float -> float</code></pre><div class="info ">
-Returns a lower bound of the product of two floating-point numbers<br>
+Returns a lower bound of the product of two floating-point numbers
+   <b>(optimal)</b><br>
 </div>
 
 <pre><span id="VALfmul_high"><span class="keyword">val</span> fmul_high</span> : <code class="type">float -> float -> float</code></pre><div class="info ">
-Returns an upper bound of the product of two floating-point numbers<br>
+Returns an upper bound of the product of two floating-point
+   numbers <b>(optimal)</b><br>
 </div>
 
 <pre><span id="VALfdiv_low"><span class="keyword">val</span> fdiv_low</span> : <code class="type">float -> float -> float</code></pre><div class="info ">
-Returns a lower bound of the ratio of two floating-point numbers<br>
+Returns a lower bound of the ratio of two floating-point numbers
+   <b>(optimal)</b><br>
 </div>
 
 <pre><span id="VALfdiv_high"><span class="keyword">val</span> fdiv_high</span> : <code class="type">float -> float -> float</code></pre><div class="info ">
-Returns an upper bound of the ratio of two floating-point numbers<br>
+Returns an upper bound of the ratio of two floating-point numbers
+   <b>(optimal)</b><br>
 </div>
 
 <pre><span id="VALfsqr_low"><span class="keyword">val</span> fsqr_low</span> : <code class="type">float -> float</code></pre><div class="info ">
-Returns a lower bound of <code class="code">x^2</code><br>
+Returns a lower bound of <code class="code">x^2</code> <b>(optimal)</b><br>
 </div>
 
 <pre><span id="VALfsqr_high"><span class="keyword">val</span> fsqr_high</span> : <code class="type">float -> float</code></pre><div class="info ">
-Returns an upper bound of <code class="code">x^2</code><br>
+Returns an upper bound of <code class="code">x^2</code> <b>(optimal)</b><br>
 </div>
 
 <pre><span id="VALfsqrt_low"><span class="keyword">val</span> fsqrt_low</span> : <code class="type">float -> float</code></pre><div class="info ">
-Returns a lower bound of <code class="code">sqrt x</code><br>
+Returns a lower bound of <code class="code">sqrt x</code> <b>(optimal)</b><br>
 </div>
 
 <pre><span id="VALfsqrt_high"><span class="keyword">val</span> fsqrt_high</span> : <code class="type">float -> float</code></pre><div class="info ">
-Returns an upper bound of <code class="code">sqrt x</code><br>
+Returns an upper bound of <code class="code">sqrt x</code> <b>(optimal)</b><br>
 </div>
 
 <pre><span id="VALfexp_low"><span class="keyword">val</span> fexp_low</span> : <code class="type">float -> float</code></pre><div class="info ">

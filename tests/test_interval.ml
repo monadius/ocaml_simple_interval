@@ -370,6 +370,16 @@ let abs_i ({lo; hi} as v) =
     else
       {lo = 0.0; hi = float_max_nan [a; b]}
 
+let max_ii ({lo = a; hi = b} as v) ({lo = c; hi = d} as w) =
+  if is_empty v || is_empty w then empty_interval
+  else
+    {lo = max a c; hi = max b d}
+
+let min_ii ({lo = a; hi = b} as v) ({lo = c; hi = d} as w) =
+  if is_empty v || is_empty w then empty_interval
+  else
+    {lo = min a c; hi = min b d} 
+        
 let neg_i ({lo; hi} as v) =
   if is_empty v then empty_interval else {lo = -.hi; hi = -.lo}
   

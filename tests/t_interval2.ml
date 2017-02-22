@@ -214,6 +214,30 @@ let () =
            (standard_data_f2 ~n:samples ~sign:0)
 
 
+(* min/max tests *)
+
+let test_min_max_ii ((a, b) as p1) ((c, d) as p2) =
+  let v, tv = intervals_of_pair p1 and
+      w, tw = intervals_of_pair p2 in
+  let r1 = min_ii v w and
+      r2 = max_ii v w and
+      tr1 = T.min_ii tv tw and
+      tr2 = T.max_ii tv tw in
+  begin
+    fact ("valid", is_valid r1 && is_valid r2 && T.is_valid tr1 && T.is_valid tr2);
+    fact ("eq_min", test_eq_intervals r1 tr1);
+    fact ("eq_max", test_eq_intervals r2 tr2);
+  end;
+  true
+
+let () =
+  let f = test_min_max_ii in
+  run_test (test_f2f2 "min(max)_ii (special)" f)
+           (special_data_f2f2 ());
+  run_test (test_f2f2 "min(max)_ii" f)
+           (standard_data_f2f2 ~n:samples ~sign:0)
+
+
 (* add tests *)
 
 let test_add_ii ((a, b) as p1) ((c, d) as p2) =

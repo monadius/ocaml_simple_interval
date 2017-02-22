@@ -417,6 +417,20 @@ let abs_i ({low = a; high = b} as v) =
   else
     {low = 0.; high = max (-.a) b}
 
+let max_ii ({low = a; high = b} as v) ({low = c; high = d} as w) =
+  if is_empty v || is_empty w then empty_interval
+  else {
+      low = if a <= c then c else a;
+      high = if b <= d then d else b;
+    }
+
+let min_ii ({low = a; high = b} as v) ({low = c; high = d} as w) =
+  if is_empty v || is_empty w then empty_interval
+  else {
+      low = if a <= c then a else c;
+      high = if b <= d then b else d;
+    }
+
 let add_ii ({low = a; high = b} as v) ({low = c; high = d} as w) =
   if is_empty v || is_empty w then empty_interval
   else {

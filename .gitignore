@@ -22,3 +22,13 @@ setup.log
 # tmp
 *~
 a.out
+
+# other
+p_interval1
+p_interval1_opt
+p_interval2
+p_interval2_opt
+t_interval1
+t_interval1_opt
+t_interval2
+t_interval2_opt

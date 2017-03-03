@@ -104,6 +104,11 @@ let test_log_i {low = a; high = b} = {
     high = log b;
   }
 
+let test_atan_i {low = a; high = b} = {
+    low = atan a;
+    high = atan b;
+  }
+
 let test_pow_i {low = a; high = b} x = {
     low = a ** x;
     high = b ** x;
@@ -132,12 +137,18 @@ let () =
   let base_mean, _ = run_f "sqr" (fun x -> x *. x) in
   ignore @@ run_f "fsqr_low" ~base_mean fsqr_low;
   ignore @@ run_f "fsqr_high" ~base_mean fsqr_high;
-  let base_mean, _ = run_f "sqrt" sqrt in
+  let base_mean, _ = run_f_pos "sqrt" sqrt in
   ignore @@ run_f_pos "fsqrt_low" ~base_mean fsqrt_low;
   ignore @@ run_f_pos "fsqrt_high" ~base_mean fsqrt_high;
   let base_mean, _ = run_f "exp" exp in
   ignore @@ run_f "fexp_low" ~base_mean fexp_low;
   ignore @@ run_f "fexp_high" ~base_mean fexp_high;
+  let base_mean, _ = run_f_pos "log" log in
+  ignore @@ run_f_pos "flog_low" ~base_mean flog_low;
+  ignore @@ run_f_pos "flog_high" ~base_mean flog_high;
+  let base_mean, _ = run_f "atan" atan in
+  ignore @@ run_f "fatan_low" ~base_mean fatan_low;
+  ignore @@ run_f "fatan_high" ~base_mean fatan_high;
   let base_mean, _ = run_f "x^2" (fun x -> x ** 2.) in
   ignore @@ run_f "fpown_low(2)" ~base_mean (fun x -> fpown_low x 2);
   ignore @@ run_f "fpown_high(2)" ~base_mean (fun x -> fpown_high x 2);
@@ -188,6 +199,8 @@ let () =
   ignore @@ run_i "exp_i" ~base_mean exp_i;
   let base_mean, _ = run_i_pos "*test*: log_i" test_log_i in
   ignore @@ run_i_pos "log_i" ~base_mean log_i;
+  let base_mean, _ = run_i "*test*: atan_i" test_atan_i in
+  ignore @@ run_i "atan_i" ~base_mean atan_i;
   let base_mean, _ = run_i "*test*: x^2" (fun v -> test_pow_i v 2.) in
   ignore @@ run_i "pown_i(2)" ~base_mean (fun v -> pown_i v 2);
   let base_mean, _ = run_i "*test*: x^3" (fun v -> test_pow_i v 3.) in

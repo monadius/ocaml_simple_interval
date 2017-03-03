@@ -3,6 +3,7 @@
 <head>
 <link rel="stylesheet" href="style.css" type="text/css">
 <meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="Start" href="index.html">
 <link rel="previous" href="Interval1.html">
 <link rel="Up" href="index.html">
@@ -31,7 +32,7 @@ A simple OCaml interval library.
    compatible and the rounding mode is to nearest.
 <p>
 
-   It is also assumed that OCaml functions <code class="code">exp</code>, <code class="code">log</code> compute results with
+   It is also assumed that OCaml functions <code class="code">exp</code>, <code class="code">log</code>, <code class="code">atan</code> compute results with
    less than 1 ulp error. 
 <p>
 
@@ -197,6 +198,11 @@ Interval natural logarithm. It is assumed that the standard
    function <code class="code">log:float-&gt;float</code> has less than 1 ulp error.<br>
 </div>
 
+<pre><span id="VALatan_i"><span class="keyword">val</span> atan_i</span> : <code class="type"><a href="Interval2.html#TYPEinterval">interval</a> -> <a href="Interval2.html#TYPEinterval">interval</a></code></pre><div class="info ">
+Interval arctangent. It is assumed that the standard
+   function <code class="code">atan:float-&gt;float</code> has less than 1 ulp error.<br>
+</div>
+
 <pre><span id="VALsin_i"><span class="keyword">val</span> sin_i</span> : <code class="type"><a href="Interval2.html#TYPEinterval">interval</a> -> <a href="Interval2.html#TYPEinterval">interval</a></code></pre><div class="info ">
 Interval sine (not implemented yet)<br>
 </div>
@@ -283,6 +289,14 @@ Returns a lower bound of <code class="code">log x</code><br>
 
 <pre><span id="VALflog_high"><span class="keyword">val</span> flog_high</span> : <code class="type">float -> float</code></pre><div class="info ">
 Returns an upper bound of <code class="code">log x</code><br>
+</div>
+
+<pre><span id="VALfatan_low"><span class="keyword">val</span> fatan_low</span> : <code class="type">float -> float</code></pre><div class="info ">
+Returns a lower bound of <code class="code">atan x</code><br>
+</div>
+
+<pre><span id="VALfatan_high"><span class="keyword">val</span> fatan_high</span> : <code class="type">float -> float</code></pre><div class="info ">
+Returns an upper bound of <code class="code">atan x</code><br>
 </div>
 
 <pre><span id="VALfpown_low"><span class="keyword">val</span> fpown_low</span> : <code class="type">float -> int -> float</code></pre><div class="info ">

@@ -368,6 +368,16 @@ let flog_high x =
     if r = neg_infinity then -.max_float
     else fsucc r
 
+let fatan_low x =
+  if x = 0. then 0.
+  else
+    fpred (atan x)
+
+let fatan_high x =
+  if x = 0. then 0.
+  else
+    fsucc (atan x)
+
 (* Interval type and functions *)
 
 (* [0, +infinity] contains all finite positive numbers, etc. *)
@@ -654,6 +664,13 @@ let log_i ({low = a; high = b} as v) =
   else {
     low = if a <= 0. then neg_infinity else flog_low a;
     high = flog_high b;
+  }
+
+let atan_i {low = a; high = b} =
+  if a = infinity then empty_interval
+  else {
+    low = fatan_low a;
+    high = fatan_high b;
   }
 
 let sin_i {low = a; high = b} =

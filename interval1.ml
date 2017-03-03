@@ -148,6 +148,16 @@ let flog_high x =
     if r = neg_infinity then -.max_float
     else fsucc r
 
+let fatan_low x =
+  if x = 0. then 0.
+  else
+    fpred (atan x)
+
+let fatan_high x =
+  if x = 0. then 0.
+  else
+    fsucc (atan x)
+
 let fcos_low x =
   let r = cos x in
   if r > -1.0 then
@@ -606,6 +616,13 @@ let log_i {low = a; high = b} =
     high = flog_high b;
   }
 
+let atan_i {low = a; high = b} =
+  if a = infinity then empty_interval
+  else {
+    low = fatan_low a;
+    high = fatan_high b;
+  }
+         
 let sin_i {low = a; high = b} =
   failwith "sin_i: Not implemented"
 

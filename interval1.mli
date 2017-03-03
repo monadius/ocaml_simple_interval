@@ -15,8 +15,8 @@
    It is assumed that all floating-point operations are IEEE 754
    compatible and the rounding mode is to nearest.
 
-   It is also assumed that OCaml functions [exp], [log] compute results with
-   less than 1 ulp error. 
+   It is also assumed that OCaml functions [exp], [log], [atan] compute results with
+   less than 1 ulp error.
 
    Intervals computed with this library may be not the optimal
    floating-point intervals. But the error for each endpoint is at
@@ -134,6 +134,10 @@ val exp_i : interval -> interval
    function [log:float->float] has less than 1 ulp error. *)
 val log_i : interval -> interval
 
+(** Interval arctangent. It is assumed that the standard
+   function [atan:float->float] has less than 1 ulp error. *)
+val atan_i : interval -> interval
+
 (** Interval sine (not implemented yet) *)
 val sin_i : interval -> interval
 
@@ -195,6 +199,12 @@ val flog_low : float -> float
 
 (** Returns an upper bound of [log x] *)
 val flog_high : float -> float
+
+(** Returns a lower bound of [atan x] *)
+val fatan_low : float -> float
+
+(** Returns an upper bound of [atan x] *)
+val fatan_high : float -> float
 
 (** Return a lower bound of [cos x] *)
 val fcos_low : float -> float

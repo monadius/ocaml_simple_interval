@@ -666,8 +666,8 @@ let log_i ({low = a; high = b} as v) =
     high = flog_high b;
   }
 
-let atan_i {low = a; high = b} =
-  if a = infinity then empty_interval
+let atan_i ({low = a; high = b} as v) =
+  if is_empty v then empty_interval
   else {
     low = fatan_low a;
     high = fatan_high b;

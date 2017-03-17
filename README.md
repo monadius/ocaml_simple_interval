@@ -7,7 +7,11 @@ Original repository: [https://github.com/monadius/ocaml_simple_interval](https:/
 
 - S. Rump, P. Zimmermann, S. Boldo, G. Melquiond 
   [*Computing predecessor and successor in rounding to nearest*](https://hal.inria.fr/inria-00337537/document)
-  
+  [(link2)](http://www.ti3.tuhh.de/paper/rump/RuZiBoMe09.pdf)
+
+- S. Rump, T. Ogita, Y. Morikura, S. Oishi
+  [*Interval arithmetic with fixed rounding mode*](https://www.jstage.jst.go.jp/article/nolta/7/3/7_362/_pdf)
+
 - F. Goualard 
   [*How do you compute the midpoint of an interval?*](https://hal.archives-ouvertes.fr/hal-00576641/document)
   

@@ -3,6 +3,7 @@ sudo: required
 env:
   global:
     - TEST_SAMPLES=500
+    - INSTALL_XQUARTZ=false
   matrix:
     - OCAML_VERSION=4.00
     - OCAML_VERSION=4.01

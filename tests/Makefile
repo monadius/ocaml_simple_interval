@@ -1,34 +1,38 @@
-all: interval1 interval1-opt
+all: t_interval1 t_interval1_opt t_interval2 t_interval2_opt
+	./t_interval1
+	./t_interval1_opt
+	./t_interval2
+	./t_interval2_opt
 
-interval1:
+t_interval1:
 	ocamlc -o t_interval1 -I .. nums.cma unix.cma \
 		../interval1.ml test_interval.ml test.ml t_interval1.ml
 	ocamlc -o p_interval1 -I .. unix.cma \
 		../interval1.ml test.ml p_interval1.ml
 
-interval1-opt:
+t_interval1_opt:
 	ocamlopt -o t_interval1_opt -I .. nums.cmxa unix.cmxa \
 		../interval1.ml test_interval.ml test.ml t_interval1.ml
 	ocamlopt -o p_interval1_opt -I .. unix.cmxa \
 		../interval1.ml test.ml p_interval1.ml
 
-interval2:
+t_interval2:
 	ocamlc -o t_interval2 -I .. nums.cma unix.cma \
 		../interval2.ml test_interval.ml test.ml t_interval2.ml
 	ocamlc -o p_interval2 -I .. nums.cma unix.cma \
 		../interval2.ml test.ml p_interval2.ml
 
-interval2-opt:
+t_interval2_opt:
 	ocamlopt -o t_interval2_opt -I .. nums.cmxa unix.cmxa \
 		../interval2.ml test_interval.ml test.ml t_interval2.ml
 	ocamlopt -o p_interval2_opt -I .. nums.cmxa unix.cmxa \
 		../interval2.ml test.ml p_interval2.ml
 
-interval-tmp:
+t_interval_tmp:
 	ocamlc -o t_interval_tmp -I .. nums.cma unix.cma \
 		../interval_tmp.ml test_interval.ml test.ml t_interval_tmp.ml
 
-interval-tmp-opt:
+t_interval_tmp_opt:
 	ocamlopt -o t_interval_tmp_opt -I .. nums.cmxa unix.cmxa \
 		../interval_tmp.ml test_interval.ml test.ml t_interval_tmp.ml
 

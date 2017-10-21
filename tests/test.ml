@@ -1,5 +1,14 @@
 exception Bad_fact of string
 
+let errors, incr_errors, reset_errors =
+  let errors = ref 0 in
+  (fun () -> !errors),
+  (fun () -> incr errors),
+  (fun () -> errors := 0)
+
+(* |> is not defined before 4.01 *)
+let (|>) a f = f a
+
 let fact (str, b) = if not b then raise (Bad_fact str)
 
 let eta_float = ldexp 1.0 (-1074)
@@ -173,6 +182,7 @@ let run_test (test: 'a test) (data: 'a Stream.t) =
       assert result
     with
     | Bad_fact str ->
+       incr_errors ();
        let msg = Printf.sprintf "\rFAIL (%s): %s"
                                 str (test.test_arg_name x) in
        let fmt = Format.err_formatter in
@@ -180,6 +190,7 @@ let run_test (test: 'a test) (data: 'a Stream.t) =
        Format.pp_print_string fmt msg;
        Format.pp_print_newline fmt ()
     | _ ->
+       incr_errors ();
        let msg = Printf.sprintf "\rFAIL: %s" (test.test_arg_name x) in
        let fmt = Format.err_formatter in
        if !new_line_flag then (Format.pp_print_newline fmt (); new_line_flag := false);

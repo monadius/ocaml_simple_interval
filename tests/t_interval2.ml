@@ -4,7 +4,11 @@ open Interval2
 module T = Test_interval
        
 (* let () = Random.self_init () *)
-let samples = 1000
+let samples = 
+  try int_of_string (Sys.getenv "TEST_SAMPLES")
+  with Not_found -> 1000
+
+let () = Format.printf "samples = %d@." samples
 
 let intervals_of_pair =
   let intervals (a, b) =
@@ -673,3 +677,11 @@ let () =
            (special_data_f2 ());
   run_test (test_f2 "pown_i" f)
            (standard_data_f2 ~n:samples ~sign:0)
+
+let () =
+  let errs = errors () in
+  if errs > 0 then
+    Format.printf "FAILED: %d@." errs
+  else
+    Format.printf "ALL PASSED@.";
+  exit (if errs > 0 then 1 else 0)

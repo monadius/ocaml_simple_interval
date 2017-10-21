@@ -4,8 +4,12 @@ open Interval1
 module T = Test_interval
        
 (* let () = Random.self_init () *)
-let samples = 1000
+let samples = 
+  try int_of_string (Sys.getenv "TEST_SAMPLES")
+  with Not_found -> 1000
 
+let () = Format.printf "samples = %d@." samples
+  
 let intervals_of_pair =
   let intervals (a, b) =
     if is_nan a || is_nan b || (a = infinity && b = neg_infinity) ||
@@ -682,7 +686,7 @@ let () =
                (0., infinity), -2.,           make_interval 0. infinity;
                (0., infinity), -3.,           make_interval 0. infinity;
                (0., infinity), -8.,           make_interval 0. infinity;
-               (neg_infinity, 0.), 3.,        make_interval neg_infinity 0.;
+               (neg_infinity, 0.), 2.,        make_interval neg_infinity 0.;
                (neg_infinity, 0.), 8.,        make_interval 0. infinity;
                (neg_infinity, 0.), -2.,       make_interval 0. infinity;
                (neg_infinity, 0.), -3.,       make_interval neg_infinity 0.;
@@ -703,3 +707,11 @@ let () =
            (special_data_f2 ());
   run_test (test_f2 "pown_i" f)
            (standard_data_f2 ~n:samples ~sign:0)
+
+let () =
+  let errs = errors () in
+  if errs > 0 then
+    Format.printf "FAILED: %d@." errs
+  else
+    Format.printf "ALL PASSED@.";
+  exit (if errs > 0 then 1 else 0)

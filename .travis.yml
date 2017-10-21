@@ -1,9 +1,14 @@
 language: c
 sudo: required
 env:
-  - OCAML_VERSION=4.04
+  global:
+    - TEST_SAMPLES=11
+  matrix:
+    - OCAML_VERSION=4.04
 os:
   - linux
+git:
+  depth: 1
 before_install: 
   - wget https://raw.githubusercontent.com/ocaml/ocaml-ci-scripts/master/.travis-ocaml.sh
 install: 

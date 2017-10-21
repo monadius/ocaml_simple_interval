@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/monadius/ocaml_simple_interval.svg?branch=master)](https://travis-ci.org/monadius/ocaml_simple_interval)
+
 # ocaml_simple_interval
 A simple and (hopefully) portable floating-point interval arithmetic library in OCaml.
 

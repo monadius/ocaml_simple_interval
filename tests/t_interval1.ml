@@ -686,7 +686,7 @@ let () =
                (0., infinity), -2.,           make_interval 0. infinity;
                (0., infinity), -3.,           make_interval 0. infinity;
                (0., infinity), -8.,           make_interval 0. infinity;
-               (neg_infinity, 0.), 2.,        make_interval neg_infinity 0.;
+               (neg_infinity, 0.), 3.,        make_interval neg_infinity 0.;
                (neg_infinity, 0.), 8.,        make_interval 0. infinity;
                (neg_infinity, 0.), -2.,       make_interval 0. infinity;
                (neg_infinity, 0.), -3.,       make_interval neg_infinity 0.;

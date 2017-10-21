@@ -2,11 +2,16 @@ language: c
 sudo: required
 env:
   global:
-    - TEST_SAMPLES=11
+    - TEST_SAMPLES=500
   matrix:
+    - OCAML_VERSION=4.00
+    - OCAML_VERSION=4.01
+    - OCAML_VERSION=4.02
     - OCAML_VERSION=4.04
+    - OCAML_VERSION=4.05
 os:
   - linux
+  - osx
 git:
   depth: 1
 before_install: 

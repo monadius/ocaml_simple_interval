@@ -11,5 +11,7 @@ jobs:
     - uses: actions/checkout@v1
     - name: setup-opam-ocaml
       uses: fangyi-zhou/actions-ocaml@v1
+      with:
+        ocaml_version: 4.05.0
     - name: Build
       run: make

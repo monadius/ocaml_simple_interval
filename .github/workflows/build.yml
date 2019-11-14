@@ -18,7 +18,7 @@ jobs:
         ocaml_version: ${{ matrix.ocaml }}
     - name: install num
       if: startsWith(matrix.ocaml, '4.09')
-      run: opam install num        
+      run: opam install -y num        
     - name: Build and test
       env:
         TEST_SAMPLES: 500

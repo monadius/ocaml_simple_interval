@@ -1,0 +1,15 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: [ubuntu-18.04]
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: setup-opam-ocaml
+      uses: fangyi-zhou/actions-ocaml@v1
+    - name: Build
+      run: make

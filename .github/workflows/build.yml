@@ -4,6 +4,9 @@ on: [push]
 
 jobs:
   build:
+    strategy:
+      matrix:
+        ocaml: [4.02.0, 4.09.0]
 
     runs-on: [ubuntu-18.04]
 
@@ -12,6 +15,11 @@ jobs:
     - name: setup-opam-ocaml
       uses: fangyi-zhou/actions-ocaml@v1
       with:
-        ocaml_version: 4.05.0
+        ocaml_version: ${{ matrix.ocaml }}
+    - name: install num
+      if: startsWith(matrix.ocaml, '4.09')
+      run: opam install num        
+    - env:
+        TEST_SAMLPES: 500
     - name: Build and test
       run: make test

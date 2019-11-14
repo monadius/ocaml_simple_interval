@@ -13,5 +13,5 @@ jobs:
       uses: fangyi-zhou/actions-ocaml@v1
       with:
         ocaml_version: 4.05.0
-    - name: Build
-      run: make
+    - name: Build and test
+      run: make test

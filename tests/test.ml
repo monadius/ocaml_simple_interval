@@ -1,5 +1,10 @@
 exception Bad_fact of string
 
+let stream_of_list lst =
+  let r = Array.of_list lst in
+  let n = Array.length r in
+  Stream.from (fun i -> if i < n then Some (Array.get r i) else None)
+
 let errors, incr_errors, reset_errors =
   let errors = ref 0 in
   (fun () -> !errors),
@@ -273,27 +278,27 @@ let mk_eq_test ?(cmp = Pervasives.compare) name name_arg f =
 
 let run_eq_f ?cmp name f data =
   let test = mk_eq_test ?cmp name (name_f name) f in
-  let sd = Stream.of_list data in
+  let sd = stream_of_list data in
   run_test test sd
 
 let run_eq_f2 ?cmp name f data =
   let test = mk_eq_test ?cmp name (name_f2 name) f in
-  let sd = Stream.of_list data in
+  let sd = stream_of_list data in
   run_test test sd
 
 let run_eq_f2f2 ?cmp name f data =
   let test = mk_eq_test ?cmp name (name_f2f2 name) (fun (p1, p2) -> f p1 p2) in
-  let sd = Stream.of_list data in
+  let sd = stream_of_list data in
   run_test test (stream_map (fun ((a, b), (c, d), r) -> ((a, b), (c, d)), r) sd)
 
 let run_eq_f2f ?cmp name f data =
   let test = mk_eq_test ?cmp name (name_f2f name) (fun (p, x) -> f p x) in
-  let sd = Stream.of_list data in
+  let sd = stream_of_list data in
   run_test test (stream_map (fun ((a, b), c, r) -> ((a, b), c), r) sd)
 
 let run_eq_ff2 ?cmp name f data =
   let test = mk_eq_test ?cmp name (name_ff2 name) (fun (x, p) -> f x p) in
-  let sd = Stream.of_list data in
+  let sd = stream_of_list data in
   run_test test (stream_map (fun (a, (b, c), r) -> (a, (b, c)), r) sd)
 
 (* Predefined test data *)
@@ -322,16 +327,16 @@ let special_floats = [
     -.(ldexp 1.0 (-1073));
   ]
 
-let special_data_f () = Stream.of_list special_floats
+let special_data_f () = stream_of_list special_floats
 
 let special_data_f2 () =
-  Stream.of_list (List.filter (fun (a, b) -> not (a > b))
+  stream_of_list (List.filter (fun (a, b) -> not (a > b))
                               (all_pairs special_floats))
 
 let special_data_f2f2 () =
   let pairs = List.filter (fun (a, b) -> not (a > b))
                           (all_pairs special_floats) in
-  Stream.of_list (all_pairs pairs)
+  stream_of_list (all_pairs pairs)
            
 let standard_data_f ~n ~sign =
   stream_concat [
